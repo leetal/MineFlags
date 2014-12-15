@@ -12,6 +12,8 @@ namespace MineFlags
         private int _columns;
         private int _mines;
 
+        private int[] _scores = new int[2] { 0, 0 };
+
         public MineFlagController(int rows, int columns, int mines)
         {
             _rows = rows;
@@ -19,15 +21,44 @@ namespace MineFlags
             _mines = mines;
 
             _buildMinefield();
+
+            /* Just open a random mine */
+            for (int i = 0; i < _minefield.Length; ++i) {
+                Mine m = _minefield[i];
+                if (m.isEmpty()) {
+                    openMine((m.row * _rows) + m.column);
+                    break;
+                }
+            }
+
+            /* Print the array with mines */
+            _printMinefield();
+        }
+
+        public Mine openMine(int index) {
+            Mine mine = _minefield[index];
+            if (mine.isOpened())
+                return mine;
+
+            mine.open();
+
+            /* Reveal all neighbouring mines if the mine has an value of 0 */
+            List<Mine> mines = _getNeighbouringMines(index, false);
+            mines.ForEach(delegate(Mine m) {
+                if (m.isEmpty()) openMine((m.row * _columns) + m.column);
+            });
+
+            /* Return the mine that was opened */
+            return mine;
         }
 
         // Private methods
         private void _buildMinefield()
         {
             // Create all the mines in the minefield
-            _minefield = new Mine[_rows * _columns - 1];
+            _minefield = new Mine[_rows * _columns];
             for (int index = 0; index < _minefield.Length; ++index)
-                _minefield[index] = new Mine();
+                _minefield[index] = new Mine((index / _columns), (index % _columns));
 
             // Set out some mines
             Random r = new Random();
@@ -41,47 +72,56 @@ namespace MineFlags
                     continue;
 
                 mine.setAsMine(true);
-                _updateAroundMine(index);
+
+                /* Tell the neighbours about the newly added mine */
+                List<Mine> mines = _getNeighbouringMines(index, true);
+                mines.ForEach(delegate(Mine m) {
+                    m.increaseNeighbours();
+                });
+
                 ++added_mines;
             }
 
-            /* Print the array with mines */
             _printMinefield();
         } 
 
-        private void _updateAroundMine(int index)
+        //private void _updateAroundMine(int index)
+        private List<Mine> _getNeighbouringMines(int index, bool corners)
         {
+            List<Mine> mines = new List<Mine>();
             int y = _getRowForIndex(index);
             int x = _getColumnForIndex(index);
 
-            // Tell the mines above about the new mine
+            // Get the mines above about the new mine
             {
-                int row = ((y - 1) < 0) ? 0 : (y - 1) * _rows;
-                _minefield[row + ((x - 1) < 0 ? 0 : (x - 1))].increaseNeighbours();
-                _minefield[row + x].increaseNeighbours();
-                //_minefield[row + ((x + 1) >= _rows)].increaseNeighbours();
+                int row = y - 1;
+                if (row >= 0) {
+                    if (corners && (x - 1) >= 0) mines.Add(_minefield[row * _rows + (x - 1)]);
+                    if (corners && (x + 1) < _columns) mines.Add(_minefield[row * _rows + (x + 1)]);
+                    mines.Add(_minefield[row * _rows + x]);
+                }
             }
 
-            // Tell the one's on the sides
+            // Get the one's on the sides
             {
-                int row = y * _rows;
-                _minefield[row + (((x - 1) < 0) ? 0 : (x - 1))].increaseNeighbours();
-                _minefield[row + (((x + 1) >= _columns) ? 0 : (x + 1))].increaseNeighbours();
+                int row = y;
+                if ((x - 1) >= 0) mines.Add(_minefield[row * _rows + (x - 1)]);
+                if ((x + 1) < _columns) mines.Add(_minefield[row * _rows + (x + 1)]);
             }
 
-            // Tell the one's below
+            // Get the one's below
             {
-                int row = ((y + 1) >= _rows) ? _rows : (y + 1);
-                _minefield[row + (x - 1)].increaseNeighbours();
-                _minefield[row + x].increaseNeighbours();
-                _minefield[row + (x + 1)].increaseNeighbours();
+                int row = (y + 1);
+                if (row < _rows)
+                {
+                    if (corners && (x - 1) >= 0) mines.Add(_minefield[row * _rows + (x - 1)]);
+                    if (corners && (x + 1) < _columns) mines.Add(_minefield[row * _rows + (x + 1)]);
+                    mines.Add(_minefield[row * _rows + x]);
+                }
             }
+
+            return mines;
         }
-
-        // private Tuple<int, int> _getPositionForIndex(int index)
-        // {
-        //     return new Tuple<int, int>(0 ,0);
-        // }
 
         private int _getRowForIndex(int index)
         {
@@ -100,7 +140,7 @@ namespace MineFlags
                 if ((index % _columns) == 0)
                     Console.Write("\n");
 
-                Console.Write("{0}", _minefield[index].toString());
+                Console.Write(_minefield[index].toString());
             }
         }
 

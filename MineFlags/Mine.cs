@@ -10,9 +10,24 @@ namespace MineFlags
         private bool _opened = false;
         private int _neighbours = 0;
         private bool _mine = false;
+        private int _column;
+        private int _row;
 
-        public Mine()
-        { /* Does nothing */ }
+        public Mine(int row, int column)
+        {
+            _row = row;
+            _column = column;
+        }
+
+        public int row
+        {
+            get { return _row;  }
+        }
+
+        public int column
+        {
+            get { return _column; }
+        }
 
         public bool isMine()
         {
@@ -24,17 +39,33 @@ namespace MineFlags
             _mine = value;
         }
 
-        public void increaseNeighbours()
-        {
+        public void increaseNeighbours() {
             _neighbours++;
+        }
+
+        public void open() {
+            _opened = true;
+        }
+
+        public bool isOpened() {
+            return _opened;
+        }
+
+        /* A mine is considered 'empty' if it has no neighbours,
+         * isn't a mine itself and hasn't been opened. */
+        public bool isEmpty()
+        {
+            return (_neighbours == 0) && !_mine && !_opened;
         }
 
         public string toString()
         {
             if (_mine)
                 return "X";
+            else if (_opened)
+                return "O";
             else
-                return (_neighbours > 0) ? _neighbours.ToString() : " ";
+                return _neighbours > 0 ? _neighbours.ToString() : " ";
         }
     }
 }
