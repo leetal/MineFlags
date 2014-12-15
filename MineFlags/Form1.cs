@@ -21,6 +21,8 @@ namespace MineFlags
 
         public MineField()
         {
+
+            MineFlagController.onMineOpened += _handleMineAction;
             InitializeComponent();
 
         // Instantiate our MineFlagController
@@ -53,7 +55,7 @@ namespace MineFlags
             {
                 for (int col = 0; col < COLUMNS; col++)
                 {
-                    MineFlags.MineButton tempButton = new MineButton(MineButtonState.CLOSED);
+                    MineFlags.MineButton tempButton = new MineButton(MineButtonState.CLOSED, 0, Mine.Player.ONE);
                     tempButton.Location = new System.Drawing.Point(PADDING + (col * BUTTONSIZE), PADDING + (row * BUTTONSIZE));
                     tempButton.Name = "MineButton"+currentButtonIndex.ToString();
                     tempButton.Size = new System.Drawing.Size(BUTTONSIZE, BUTTONSIZE);
@@ -75,6 +77,19 @@ namespace MineFlags
         {
             MineButton caller = (MineButton)sender;
             Console.WriteLine("Button click at:" + caller.Tag.ToString());
+
+            // Handle mine open event
+            _controller.openMine((int)caller.Tag);
+        }
+
+        private void _handleMineAction(Mine mine)
+        {
+            Console.WriteLine("Mineaction cathced");
+
+            // Catch onMineOpened event
+            // Update view accordïngly
+
+
         }
 
     }

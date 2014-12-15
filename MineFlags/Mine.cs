@@ -7,6 +7,12 @@ namespace MineFlags
 {
     class Mine
     {
+        public enum Player
+        {
+            ONE,
+            TWO
+        };
+
         private bool _opened = false;
         private int _neighbours = 0;
         private bool _mine = false;
