@@ -9,9 +9,12 @@ using System.Windows.Forms;
 
 namespace MineFlags
 {
-    public partial class Form1 : Form
+    public partial class MineFlagField : Form
     {
-        public Form1()
+        // Private members
+        private MineButton[] mineButtons;
+
+        public MineFlagField()
         {
             InitializeComponent();
         }
@@ -24,6 +27,29 @@ namespace MineFlags
         private void mineButton1_Click(object sender, EventArgs e)
         {
             Console.WriteLine("Testclick");
+        }
+
+        // Private memeber functions
+
+        // Helper to setup the mines on the field.
+        private void _setupButtons(System.Drawing.Rectangle size)
+        {
+            /*
+            this.mineButton1 = new MineFlags.MineButton();
+            this.mineButton1.Location = new System.Drawing.Point(54, 28);
+            this.mineButton1.Name = "mineButton1";
+            this.mineButton1.Size = new System.Drawing.Size(75, 40);
+            this.mineButton1.TabIndex = 0;
+            this.mineButton1.Text = "mineButton1";
+            this.mineButton1.UseVisualStyleBackColor = true;
+            this.mineButton1.Click += new System.EventHandler(this.mineButton1_Click);*/
+        }
+
+        // Public accessors
+
+        public Rectangle GetScreenSize()
+        {
+            return Screen.FromControl(this).Bounds;
         }
 
     }
