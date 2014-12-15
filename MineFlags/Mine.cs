@@ -35,8 +35,8 @@ namespace MineFlags
             get { return _column; }
         }
 
-        public int index() {
-            return (_row * 1) + _column;
+        public int index {
+            get { return (_row * MineField.ROWS) + _column; }
         }
 
         public bool isMine()
@@ -54,6 +54,9 @@ namespace MineFlags
         }
 
         public int getNeighbours() {
+            if (isMine())
+                return 0;
+
             return _neighbours;
         }
 
