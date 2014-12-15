@@ -21,7 +21,7 @@ namespace MineFlags
             InitializeComponent();
 
         // Instantiate our MineFlagController
-            _controller = new MineFlagController();
+            _controller = new MineFlagController(ROWS, COLUMNS, MINES);
         }
 
         private void Form1_Load(object sender, EventArgs e)
