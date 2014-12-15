@@ -57,9 +57,9 @@ namespace MineFlags
             // Tell the mines above about the new mine
             {
                 int row = ((y - 1) < 0) ? 0 : (y - 1) * _rows;
-                _minefield[row + ((x - 1) < 0 ? 0 : (x - 1)].increaseNeighbours();
+                _minefield[row + ((x - 1) < 0 ? 0 : (x - 1))].increaseNeighbours();
                 _minefield[row + x].increaseNeighbours();
-                _minefield[row + ((x + 1) >= _rows].increaseNeighbours();
+                //_minefield[row + ((x + 1) >= _rows)].increaseNeighbours();
             }
 
             // Tell the one's on the sides
