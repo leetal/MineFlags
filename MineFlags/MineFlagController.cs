@@ -25,7 +25,7 @@ namespace MineFlags
         private void _buildMinefield()
         {
             // Create all the mines in the minefield
-            _minefield = new Mine[_rows * _columns - 1];
+            _minefield = new Mine[_rows * _columns];
             for (int index = 0; index < _minefield.Length; ++index)
                 _minefield[index] = new Mine();
 
@@ -54,27 +54,32 @@ namespace MineFlags
             int y = _getRowForIndex(index);
             int x = _getColumnForIndex(index);
 
-            // Tell the mine above about the new mine
+            // Tell the mines above about the new mine
             {
-                int row = ((y - 1) < 0) ? 0 : (y - 1);
-                _minefield[(row * _rows) + (x - 1)].increaseNeighbours();
-                _minefield[(row * _rows) + x].increaseNeighbours();
-                _minefield[(row * _rows) + (x + 1)].increaseNeighbours();
+                int row = y - 1;
+                if (row >= 0) {
+                    if ((x - 1) >= 0) _minefield[row * _rows + (x - 1)].increaseNeighbours();
+                    _minefield[row * _rows + x].increaseNeighbours();
+                    if ((x + 1) < _columns) _minefield[row * _rows + (x + 1)].increaseNeighbours();
+                }
             }
 
             // Tell the one's on the sides
             {
-                int row = y * _rows;
-                _minefield[row + (((x - 1) < 0) ? 0 : (x - 1))].increaseNeighbours();
-                _minefield[row + (((x + 1) >= _columns) ? 0 : (x + 1))].increaseNeighbours();
+                int row = y;
+                if ((x - 1) >= 0) _minefield[row * _rows + (x - 1)].increaseNeighbours();
+                if ((x + 1) < _columns) _minefield[row * _rows + (x + 1)].increaseNeighbours();
             }
 
             // Tell the one's below
             {
-                int row = ((y + 1) >= _rows) ? _rows : (y + 1);
-                _minefield[row + (x - 1)].increaseNeighbours();
-                _minefield[row + x].increaseNeighbours();
-                _minefield[row + (x + 1)].increaseNeighbours();
+                int row = (y + 1);
+                if (row < _rows)
+                {
+                    if ((x - 1) >= 0) _minefield[row * _rows + (x - 1)].increaseNeighbours();
+                    _minefield[row * _rows + x].increaseNeighbours();
+                    if ((x + 1) < _columns) _minefield[row * _rows + (x + 1)].increaseNeighbours();
+                }
             }
         }
 

@@ -34,7 +34,7 @@ namespace MineFlags
             if (_mine)
                 return "X";
             else
-                return (_neighbours > 0) ? _neighbours.ToString() : " ";
+                return _neighbours.ToString();
         }
     }
 }
