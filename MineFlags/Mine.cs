@@ -60,12 +60,12 @@ namespace MineFlags
 
         public string toString()
         {
-            if (_opened)
-                return " ";
-            else if (_mine)
+            if (_mine)
                 return "X";
+            else if (_opened)
+                return "O";
             else
-                return _neighbours.ToString();
+                return _neighbours > 0 ? _neighbours.ToString() : " ";
         }
     }
 }
