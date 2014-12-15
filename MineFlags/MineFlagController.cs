@@ -10,7 +10,7 @@ namespace MineFlags
         private Mine[] _minefield;
         private int _rows;
         private int _columns;
-        private int _mines;
+        private int _remaining_mines;
 
         private int[] _scores = new int[2] { 0, 0 };
 
@@ -18,7 +18,7 @@ namespace MineFlags
         {
             _rows = rows;
             _columns = columns;
-            _mines = mines;
+            _remaining_mines = mines;
 
             _buildMinefield();
 
@@ -35,21 +35,27 @@ namespace MineFlags
             _printMinefield();
         }
 
-        public Mine openMine(int index) {
+        public delegate void MineHandler(Mine m);
+        public static event MineHandler onMineOpened;
+        public void openMine(int index) {
             Mine mine = _minefield[index];
             if (mine.isOpened())
-                return mine;
+                return;
 
             mine.open();
 
-            /* Reveal all neighbouring mines if the mine has an value of 0 */
-            List<Mine> mines = _getNeighbouringMines(index, false);
-            mines.ForEach(delegate(Mine m) {
-                if (m.isEmpty()) openMine((m.row * _columns) + m.column);
-            });
+            if (mine.isEmpty()) {
+                /* Reveal all neighbouring mines if the mine has an value of 0 */
+                List<Mine> mines = _getNeighbouringMines(index, false);
+                mines.ForEach(delegate(Mine m) {
+                    if (m.isEmpty()) openMine((m.row * _columns) + m.column);
+                });
+            } else if (mine.isMine()) {
+                /* Up the score of the one who took it */
+            }
 
-            /* Return the mine that was opened */
-            return mine;
+            /* Notify everyone about the opened mine */
+            onMineOpened(mine);
         }
 
         // Private methods
@@ -63,7 +69,7 @@ namespace MineFlags
             // Set out some mines
             Random r = new Random();
             int added_mines = 0;
-            while (added_mines < _mines) {
+            while (added_mines < _remaining_mines) {
                 int index = r.Next(0, _minefield.Length - 1);
                 Mine mine = _minefield[index];
 
