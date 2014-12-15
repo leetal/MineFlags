@@ -54,6 +54,9 @@ namespace MineFlags
         }
 
         public int getNeighbours() {
+            if (isMine())
+                return 0;
+
             return _neighbours;
         }
 
