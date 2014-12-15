@@ -55,7 +55,7 @@ namespace MineFlags
             {
                 for (int col = 0; col < COLUMNS; col++)
                 {
-                    MineFlags.MineButton tempButton = new MineButton(MineButtonState.CLOSED, 0, Mine.Player.ONE);
+                    MineFlags.MineButton tempButton = new MineButton();
                     tempButton.Location = new System.Drawing.Point(PADDING + (col * BUTTONSIZE), PADDING + (row * BUTTONSIZE));
                     tempButton.Name = "MineButton"+currentButtonIndex.ToString();
                     tempButton.Size = new System.Drawing.Size(BUTTONSIZE, BUTTONSIZE);
@@ -76,20 +76,26 @@ namespace MineFlags
         private void mineButtonClickEvent(object sender, EventArgs e)
         {
             MineButton caller = (MineButton)sender;
-            Console.WriteLine("Button click at:" + caller.Tag.ToString());
-
+            int clickedIndex = (int)caller.Tag;
+            Console.WriteLine("Button click at:" + clickedIndex.ToString());
             // Handle mine open event
-            _controller.openMine((int)caller.Tag);
+            _controller.openMine(clickedIndex);
         }
 
         private void _handleMineAction(Mine mine)
         {
-            Console.WriteLine("Mineaction cathced");
-
+            Console.WriteLine("Mineaction cathced: "+mine.index().ToString());
             // Catch onMineOpened event
-            // Update view accordïngly
-
-
+            // Update view accordingly
+            MineButton modifiedMine = _mineButtons[mine.index()];
+            if (mine.isOpened())
+            {
+                modifiedMine.adjacentNeighbours = mine.getNeighbours();
+                if (mine.isMine())
+                {
+                    modifiedMine.player = Mine.Player.TWO;
+                }
+            }
         }
 
     }
