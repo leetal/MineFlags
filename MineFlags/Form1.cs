@@ -13,9 +13,9 @@ namespace MineFlags
     {
         public const int PADDING = 10;
         public const int BUTTONSIZE = 32;
-        public const int ROWS = 16;
-        public const int COLUMNS = 16;
-        public const int MINES = 25;
+        public static int ROWS = 16;
+        public static int COLUMNS = 16;
+        public static int MINES = 25;
         private MineFlagController _controller;
         private MineButton[] _mineButtons;
 

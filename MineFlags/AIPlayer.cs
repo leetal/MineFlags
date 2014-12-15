@@ -7,8 +7,16 @@ namespace MineFlags
 {
     class AIPlayer
     {
-        AIPlayer() {
+        private int[] _minefield;
+        AIPlayer(int rows, int columns) {
+            /* Reset the minefield */
+            _minefield = Enumerable.Repeat<int>(0, MineField.ROWS * MineField.COLUMNS).ToArray(); // new int[rows * columns];
+
             MineFlagController.onMineOpened += onMineOpened;
+        }
+
+        private void _resetMinefield() {
+
         }
 
         public void onMineOpened(Mine m) {
