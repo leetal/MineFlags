@@ -12,6 +12,7 @@ namespace MineFlags
     public partial class MineField : Form
     {
         public const int PADDING = 10;
+        public const int HEADERHEIGHT = 80;
         public const int BUTTONSIZE = 32;
         public static int ROWS = 16;
         public static int COLUMNS = 16;
@@ -43,8 +44,21 @@ namespace MineFlags
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.Size = new Size((COLUMNS * BUTTONSIZE + PADDING * 2) + 18, (ROWS * BUTTONSIZE + PADDING * 2) + 45);
+            this.Size = new Size((COLUMNS * BUTTONSIZE + PADDING * 2) + 18, (ROWS * BUTTONSIZE + PADDING * 2) + 45 + HEADERHEIGHT);
             _setupMinebuttons(getScreen());
+            _setupHeader();
+        }
+
+        private void _setupHeader()
+        {
+            Label player1Points = new Label();
+            player1Points.ImageAlign = ContentAlignment.TopLeft;
+            player1Points.Location = new System.Drawing.Point(PADDING,PADDING);
+            player1Points.BackColor = System.Drawing.Color.FromArgb(255, 210, 210, 210); // Taken (Gray)
+            player1Points.UseMnemonic = true;
+            player1Points.Text = "Player 1 points: ";
+            player1Points.Size = new Size(player1Points.PreferredWidth, player1Points.PreferredHeight);
+            this.Controls.Add(player1Points);
         }
 
         private void _setupMinebuttons(Rectangle size)
@@ -56,7 +70,7 @@ namespace MineFlags
                 for (int col = 0; col < COLUMNS; col++)
                 {
                     MineFlags.MineButton tempButton = new MineButton();
-                    tempButton.Location = new System.Drawing.Point(PADDING + (col * BUTTONSIZE), PADDING + (row * BUTTONSIZE));
+                    tempButton.Location = new System.Drawing.Point(PADDING + (col * BUTTONSIZE), HEADERHEIGHT + PADDING + (row * BUTTONSIZE));
                     tempButton.Name = "MineButton"+currentButtonIndex.ToString();
                     tempButton.Size = new System.Drawing.Size(BUTTONSIZE, BUTTONSIZE);
                     tempButton.TabIndex = 0;

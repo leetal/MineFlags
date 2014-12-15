@@ -39,6 +39,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "MineField";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MineFlags";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
