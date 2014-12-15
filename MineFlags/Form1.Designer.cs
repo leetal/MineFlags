@@ -33,12 +33,13 @@
             // 
             // mineButton1
             // 
-            this.mineButton1.Location = new System.Drawing.Point(280, 132);
+            this.mineButton1.Location = new System.Drawing.Point(204, 90);
             this.mineButton1.Name = "mineButton1";
             this.mineButton1.Size = new System.Drawing.Size(75, 23);
             this.mineButton1.TabIndex = 0;
             this.mineButton1.Text = "mineButton1";
             this.mineButton1.UseVisualStyleBackColor = true;
+            this.mineButton1.Click += new System.EventHandler(this.mineButton1_Click);
             // 
             // Form1
             // 
@@ -56,7 +57,6 @@
         #endregion
 
         private MineButton mineButton1;
-
     }
 }
 
