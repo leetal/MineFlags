@@ -35,19 +35,26 @@ namespace MineFlags
 
             mine.open();
 
-            if (mine.isEmpty()) {
+            if (!mine.isMine() && mine.getNeighbours() == 0) {
+                Console.WriteLine("mine.isEmpty() == true");
+
                 /* Reveal all neighbouring mines if the mine has an value of 0 */
-                List<Mine> mines = _getNeighbouringMines(index, false);
-                mines.ForEach(delegate(Mine m) {
-                    if (m.isEmpty()) openMine((m.row * _columns) + m.column);
-                });
+                List<Mine> mines = _getNeighbouringMines(index, true);
+                foreach (Mine m in mines) {
+                    Console.WriteLine(m.index);
+                    if (!m.isOpened() && !m.isMine()) {
+                        openMine(m.index);
+                    }
+                }
             } else if (mine.isMine()) {
                 /* Up the score of the one who took it */
             }
 
             /* Notify everyone about the opened mine */
-            if (onMineOpened != null)
+            if (onMineOpened != null) {
+                Console.WriteLine("SENDING CALLBACKS ON OPENMINE");
                 onMineOpened(mine);
+                }
         }
 
         // Private methods

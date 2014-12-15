@@ -15,7 +15,7 @@ namespace MineFlags
         public const int BUTTONSIZE = 32;
         public static int ROWS = 16;
         public static int COLUMNS = 16;
-        public static int MINES = 25;
+        public static int MINES = 50;
         private MineFlagController _controller;
         private MineButton[] _mineButtons;
 
@@ -84,10 +84,10 @@ namespace MineFlags
 
         private void _handleMineAction(Mine mine)
         {
-            Console.WriteLine("Mineaction cathced: "+mine.index().ToString());
+            Console.WriteLine("Mineaction cathced: "+mine.index.ToString());
             // Catch onMineOpened event
             // Update view accordingly
-            MineButton modifiedMine = _mineButtons[mine.index()];
+            MineButton modifiedMine = _mineButtons[mine.index];
             if (mine.isOpened())
             {
                 modifiedMine.adjacentNeighbours = mine.getNeighbours();

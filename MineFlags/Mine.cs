@@ -72,7 +72,7 @@ namespace MineFlags
          * isn't a mine itself and hasn't been opened. */
         public bool isEmpty()
         {
-            return (_neighbours == 0) && !_mine && !_opened;
+            return (getNeighbours() >= 0) && !_mine;
         }
 
         public string toString()
