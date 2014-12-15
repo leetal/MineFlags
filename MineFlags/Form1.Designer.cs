@@ -1,6 +1,6 @@
 ﻿namespace MineFlags
 {
-    partial class Form1
+    partial class MineField
     {
         /// <summary>
         /// Required designer variable.
@@ -30,19 +30,24 @@
         {
             this.SuspendLayout();
             // 
-            // Form1
+            // MineField
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(495, 528);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.Name = "MineField";
+            this.Text = "MineFlags";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
 
         }
 
         #endregion
+
+
 
     }
 }
