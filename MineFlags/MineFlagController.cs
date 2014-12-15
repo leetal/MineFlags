@@ -20,19 +20,10 @@ namespace MineFlags
             _columns = columns;
             _remaining_mines = mines;
 
+            /* Add our _printMinefield as an EventListener */
+            onResetMinefield += _printMinefield;
+
             _buildMinefield();
-
-            /* Just open a random mine */
-            for (int i = 0; i < _minefield.Length; ++i) {
-                Mine m = _minefield[i];
-                if (m.isEmpty()) {
-                    openMine((m.row * _rows) + m.column);
-                    break;
-                }
-            }
-
-            /* Print the array with mines */
-            _printMinefield();
         }
 
         public delegate void MineHandler(Mine m);
@@ -55,10 +46,13 @@ namespace MineFlags
             }
 
             /* Notify everyone about the opened mine */
-            onMineOpened(mine);
+            if (onMineOpened != null)
+                onMineOpened(mine);
         }
 
         // Private methods
+        public delegate void MinefieldHandler();
+        public static event MinefieldHandler onResetMinefield;
         private void _buildMinefield()
         {
             // Create all the mines in the minefield
@@ -88,7 +82,8 @@ namespace MineFlags
                 ++added_mines;
             }
 
-            _printMinefield();
+            if (onResetMinefield != null)
+                onResetMinefield();
         } 
 
         //private void _updateAroundMine(int index)
