@@ -43,6 +43,10 @@ namespace MineFlags
             _neighbours++;
         }
 
+        public int getNeighbours() {
+            return _neighbours;
+        }
+
         public void open() {
             _opened = true;
         }
