@@ -29,6 +29,10 @@ namespace MineFlags
             get { return _column; }
         }
 
+        public int index() {
+            return (_row * 1) + _column;
+        }
+
         public bool isMine()
         {
             return _mine;
