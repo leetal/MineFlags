@@ -24,12 +24,14 @@ namespace MineFlags
         // Delegates
         public delegate void MinefieldHandler();
         public delegate void TurnHandler(Player player);
+        public delegate void PlayerScoreChanged(Player player, int score);
         public delegate void MineHandler(Mine m);
 
         // Events
         public static event MineHandler onMineOpened;
         public static event MinefieldHandler onResetMinefield;
         public static event TurnHandler announceTurn;
+        public static event PlayerScoreChanged onScoreChanged;
 
         public MineFlagController(int rows, int columns, int mines)
         {
@@ -53,7 +55,8 @@ namespace MineFlags
 
             /* Open the mine and always change turns */
             mine.open();
-            _changeTurns();
+
+            bool shouldChangeTurn = true;
 
             if (!mine.isMine() && mine.getNeighbours() == 0) {
                 /* Reveal all neighbouring mines if the mine has an value of 0 */
@@ -67,13 +70,19 @@ namespace MineFlags
                 _scores[(int)_current_player_turn] += 1;
 
                 /* If we found a mine it's our turn again */
-                _changeTurns();
+                shouldChangeTurn = false;
             }
 
             /* Notify everyone about the opened mine */
             if (onMineOpened != null) {
                 onMineOpened(mine);
             }
+
+            // Notify about any score change
+            onScoreChanged(_current_player_turn, _scores[(int)_current_player_turn]);
+
+            if (shouldChangeTurn)
+                _changeTurns();
 
             // Notify everyone about the turn
             announceTurn(_current_player_turn);

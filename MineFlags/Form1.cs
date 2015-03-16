@@ -20,17 +20,16 @@ namespace MineFlags
         private MineFlagController _controller;
         private MineButton[] _mineButtons;
         private Panel _gameContainer;
+        private Label _player1Points;
+        private Label _player2Points;
+        private Label _playerTurn;
 
         public MineField()
         {
-
             MineFlagController.onMineOpened += _handleMineAction;
             MineFlagController.announceTurn += _handleTurn;
+            MineFlagController.onScoreChanged += _handleScoreChanged;
             InitializeComponent();
-
-            // Instantiate our MineFlagController
-            _controller = new MineFlagController(ROWS, COLUMNS, MINES);
-            _mineButtons = new MineButton[ROWS * COLUMNS];
         }
 
         protected override void OnLoad(EventArgs e)
@@ -42,7 +41,10 @@ namespace MineFlags
         {
             // Static size on the game
             this.ClientSize = new Size((COLUMNS * BUTTONSIZE + PADDING * 2), (ROWS * BUTTONSIZE + PADDING * 2) + HEADERHEIGHT);
+
+            _mineButtons = new MineButton[ROWS * COLUMNS];
             _startGame(1);
+            _controller = new MineFlagController(ROWS, COLUMNS, MINES); // Instantiate our MineFlagController
         }
 
         private void _startGame(int type)
@@ -50,7 +52,6 @@ namespace MineFlags
             _setupContainer(this.ClientSize);
             _setupHeader(this.ClientSize);
             _setupMinebuttons(this.ClientSize);
-            
         }
 
         private void _setupContainer(Size size)
@@ -66,32 +67,29 @@ namespace MineFlags
 
         private void _setupHeader(Size size)
         {
-            Label player1Points = new Label();
-            player1Points.ImageAlign = ContentAlignment.TopLeft;
-            player1Points.Location = new System.Drawing.Point(PADDING, PADDING);
-            //player1Points.BackColor = System.Drawing.Color.FromArgb(255, 210, 210, 210); // Taken (Gray)
-            player1Points.UseMnemonic = true;
-            player1Points.Text = "Player 1 points: ";
-            player1Points.Size = new Size(player1Points.PreferredWidth, player1Points.PreferredHeight);
+            _player1Points = new Label();
+            _player1Points.ImageAlign = ContentAlignment.TopLeft;
+            _player1Points.Location = new System.Drawing.Point(PADDING, PADDING);
+            _player1Points.UseMnemonic = true;
+            _player1Points.Text = "Player 1 points: 0";
+            _player1Points.Size = new Size(_player1Points.PreferredWidth, _player1Points.PreferredHeight);
 
-            Label player2Points = new Label();
-            player2Points.ImageAlign = ContentAlignment.TopLeft;
-            player2Points.Location = new System.Drawing.Point(PADDING, 3 * PADDING);
-            //player2Points.BackColor = System.Drawing.Color.FromArgb(255, 210, 210, 210); // Taken (Gray)
-            player2Points.UseMnemonic = true;
-            player2Points.Text = "Player 2 points: ";
-            player2Points.Size = new Size(player2Points.PreferredWidth, player2Points.PreferredHeight);
+            _player2Points = new Label();
+            _player2Points.ImageAlign = ContentAlignment.TopLeft;
+            _player2Points.Location = new System.Drawing.Point(PADDING, 3 * PADDING);
+            _player2Points.UseMnemonic = true;
+            _player2Points.Text = "Player 2 points: 0";
+            _player2Points.Size = new Size(_player2Points.PreferredWidth, _player2Points.PreferredHeight);
 
-            Label playerTurn = new Label();
-            playerTurn.ImageAlign = ContentAlignment.TopLeft;
-            //player2Points.BackColor = System.Drawing.Color.FromArgb(255, 210, 210, 210); // Taken (Gray)
-            playerTurn.UseMnemonic = true;
-            playerTurn.Text = "Turn";
-            playerTurn.Font = new Font(playerTurn.Font.FontFamily, 30);
-            playerTurn.Size = new Size(playerTurn.PreferredWidth, playerTurn.PreferredHeight);
-            playerTurn.Location = new System.Drawing.Point(size.Width / 2 - playerTurn.Width / 2 - PADDING, HEADERHEIGHT - playerTurn.Height);
+            _playerTurn = new Label();
+            _playerTurn.ImageAlign = ContentAlignment.TopLeft;
+            _playerTurn.UseMnemonic = true;
+            _playerTurn.Text = "Player one's turn";     // "Player 1" is always first
+            _playerTurn.Font = new Font(_playerTurn.Font.FontFamily, 24);
+            _playerTurn.Size = new Size(_playerTurn.PreferredWidth, _playerTurn.PreferredHeight);
+            _playerTurn.Location = new System.Drawing.Point(size.Width / 2 - _playerTurn.Width / 2 - PADDING, HEADERHEIGHT - _playerTurn.Height);
 
-            _gameContainer.Controls.AddRange(new Control[] { player1Points, player2Points, playerTurn });
+            _gameContainer.Controls.AddRange(new Control[] { _player1Points, _player2Points, _playerTurn });
         }
 
         private void _setupMinebuttons(Size size)
@@ -130,6 +128,7 @@ namespace MineFlags
             Console.WriteLine("Mineaction cathced: " + mine.index.ToString());
             // Catch onMineOpened event
             // Update view accordingly
+
             MineButton modifiedMine = _mineButtons[mine.index];
             if (mine.isOpened())
             {
@@ -142,8 +141,26 @@ namespace MineFlags
         }
 
         private void _handleTurn(Player player) {
-            Console.WriteLine("Player " + ((player == Player.ONE) ? "ONE" : "TWO"));
+            if(_playerTurn != null)
+                _playerTurn.Text = "Player " + ((player == Player.ONE) ? "one's" : "two's") + " turn";
         }
 
+        private void _handleScoreChanged(Player player, int score)
+        {
+            Console.WriteLine("Player " + player.ToString() + " has a score of " + score.ToString());
+            switch (player)
+            {
+                case Player.ONE:
+                    if (_player1Points != null)
+                        _player1Points.Text = "Player 1 points: " + score.ToString();
+                    break;
+                case Player.TWO:
+                    if (_player2Points != null)
+                        _player2Points.Text = "Player 2 points: " + score.ToString();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
