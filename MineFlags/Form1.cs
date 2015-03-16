@@ -33,7 +33,7 @@ namespace MineFlags
             InitializeComponent();
 
             // Create a watcher for keeping track on game updates
-            watcher = new Watcher();
+            watcher = new Watcher(FILENAME);
         }
 
         // destructor
@@ -211,6 +211,8 @@ namespace MineFlags
                     modifiedMine.player = mine.opened_by;
                 }
             }
+
+            _saveState();
         }
 
         private void _handleTurn(Player player)
@@ -245,7 +247,8 @@ namespace MineFlags
 
         private void _saveState()
         {
-            StateHandler.exportToStorage(_controller, FILENAME);
+            Console.WriteLine("--> About to save the state");
+            StateHandler.exportToStorage(_controller, "C:\\Users\\André\\asdf.xml");
         }
         private void _handleGameCompleted(Player player)
         {
