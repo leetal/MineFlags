@@ -17,7 +17,7 @@ namespace MineFlags
         public const int BUTTONSIZE = 32;
         public static int ROWS = 16;
         public static int COLUMNS = 16;
-        public static int MINES = 50;
+        public static int MINES = 1;
         private MineFlagController _controller;
         private MineButton[] _mineButtons;
         private Panel _gameContainer;
@@ -48,7 +48,7 @@ namespace MineFlags
         {
             // Static size on the game
             this.ClientSize = new Size((COLUMNS * BUTTONSIZE + PADDING * 2), (ROWS * BUTTONSIZE + PADDING * 2) + HEADERHEIGHT);
-
+            _createMenu();
             _mineButtons = new MineButton[ROWS * COLUMNS];
             _startGame(1);
 
@@ -60,6 +60,29 @@ namespace MineFlags
             _setupContainer(this.ClientSize);
             _setupHeader(this.ClientSize);
             _setupMinebuttons(this.ClientSize);
+        }
+
+        private void _createMenu()
+        {
+            MenuStrip menu = new MenuStrip();
+
+            ToolStripMenuItem fileItem = new ToolStripMenuItem("&File");
+
+            // Create our first item with an image and wired to a click event
+            // Also sets Alt + 7 as the shortcut
+            ToolStripMenuItem itemWithEventAndKey = new ToolStripMenuItem("Delete Event", null, deleteItem_Click, (Keys)Shortcut.Alt7);
+
+            fileItem.DropDownItems.Add(itemWithEventAndKey);
+
+            menu.Items.Add(fileItem);
+
+            this.Controls.Add(menu);
+        }
+
+        // Event that is called from menu item.
+        private void deleteItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Delete Event");
         }
 
         private void _setupContainer(Size size)
@@ -181,6 +204,7 @@ namespace MineFlags
 
         private void _handleGameCompleted(Player player)
         {
+            _gameContainer.Hide();
             Console.WriteLine("Game completed");
         }
     }
