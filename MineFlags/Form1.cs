@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace MineFlags
 {
@@ -32,10 +33,16 @@ namespace MineFlags
             MineFlagController.onMineOpened += _handleMineAction;
             MineFlagController.announceTurn += _handleTurn;
             MineFlagController.onScoreChanged += _handleScoreChanged;
+            MineFlagController.onGameCompleted += _handleGameCompleted;
             InitializeComponent();
 
             // Create a watcher for keeping track on game updates
             watcher = new Watcher();
+        }
+
+        // destructor
+        ~MineField() 
+        {
         }
 
         protected override void OnLoad(EventArgs e)
@@ -47,9 +54,10 @@ namespace MineFlags
         {
             // Static size on the game
             this.ClientSize = new Size((COLUMNS * BUTTONSIZE + PADDING * 2), (ROWS * BUTTONSIZE + PADDING * 2) + HEADERHEIGHT);
-
+            _createMenu();
             _mineButtons = new MineButton[ROWS * COLUMNS];
             _startGame(1);
+
             _controller = new MineFlagController(ROWS, COLUMNS, MINES); // Instantiate our MineFlagController
         }
 
@@ -58,6 +66,29 @@ namespace MineFlags
             _setupContainer(this.ClientSize);
             _setupHeader(this.ClientSize);
             _setupMinebuttons(this.ClientSize);
+        }
+
+        private void _createMenu()
+        {
+            MenuStrip menu = new MenuStrip();
+
+            ToolStripMenuItem fileItem = new ToolStripMenuItem("&File");
+
+            // Create our first item with an image and wired to a click event
+            // Also sets Alt + 7 as the shortcut
+            ToolStripMenuItem itemWithEventAndKey = new ToolStripMenuItem("Delete Event", null, deleteItem_Click, (Keys)Shortcut.Alt7);
+
+            fileItem.DropDownItems.Add(itemWithEventAndKey);
+
+            menu.Items.Add(fileItem);
+
+            this.Controls.Add(menu);
+        }
+
+        // Event that is called from menu item.
+        private void deleteItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Delete Event");
         }
 
         private void _setupContainer(Size size)
@@ -136,23 +167,26 @@ namespace MineFlags
             // Update view accordingly
 
             MineButton modifiedMine = _mineButtons[mine.index];
-            if (mine.isOpened()) {
+            if (mine.isOpened())
+            {
                 modifiedMine.adjacentNeighbours = mine.getNeighbours();
 
-                if (mine.isMine()) {
+                if (mine.isMine())
+                {
                     modifiedMine.player = mine.opened_by;
                 }
             }
         }
 
-        private void _handleTurn(Player player) {
-            if(_playerTurn != null)
+        private void _handleTurn(Player player)
+        {
+            if (_playerTurn != null)
                 _playerTurn.Text = "Player " + ((player == Player.ONE) ? "one's" : "two's") + " turn";
         }
 
         private void _handleScoreChanged(Player player, int score)
         {
-            Console.WriteLine("Player " + player.ToString() + " has a score of " + score.ToString());
+            Console.WriteLine("Player {0} has a score of {1}", player.ToString(), score.ToString());
             switch (player)
             {
                 case Player.ONE:
@@ -177,6 +211,11 @@ namespace MineFlags
         private void _saveState()
         {
             StateHandler.exportToStorage(_controller, FILENAME);
+        }
+        private void _handleGameCompleted(Player player)
+        {
+            _gameContainer.Hide();
+            Console.WriteLine("Game completed");
         }
     }
 }
