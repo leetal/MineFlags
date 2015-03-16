@@ -17,19 +17,25 @@ namespace MineFlags
         public static int ROWS = 16;
         public static int COLUMNS = 16;
         public static int MINES = 50;
+        private const String FILENAME = "data.xml";
         private MineFlagController _controller;
         private MineButton[] _mineButtons;
         private Panel _gameContainer;
         private Label _player1Points;
         private Label _player2Points;
         private Label _playerTurn;
+        private bool _saving = false;
 
+        public Watcher watcher { get; set; }
         public MineField()
         {
             MineFlagController.onMineOpened += _handleMineAction;
             MineFlagController.announceTurn += _handleTurn;
             MineFlagController.onScoreChanged += _handleScoreChanged;
             InitializeComponent();
+
+            // Create a watcher for keeping track on game updates
+            watcher = new Watcher();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -166,6 +172,11 @@ namespace MineFlags
                 default:
                     break;
             }
+        }
+
+        private void _saveState()
+        {
+            StateHandler.exportToStorage(_controller, FILENAME);
         }
     }
 }

@@ -25,14 +25,12 @@ namespace MineFlags
         // Delegates
         public delegate void MinefieldHandler();
         public delegate void TurnHandler(Player player);
-        public delegate void PlayerScoreChanged(Player player, int score);
         public delegate void MineHandler(Mine m);
 
         // Events
         public static event MineHandler onMineOpened;
         public static event MinefieldHandler onResetMinefield;
         public static event TurnHandler announceTurn;
-        public static event PlayerScoreChanged onScoreChanged;
 
         public MineFlagController(int rows, int columns, int mines, bool ai_player = true)
         {
@@ -67,15 +65,12 @@ namespace MineFlags
                 if (!mine.isOpened() && !mine.isMine()) {
                     mine.open(_current_player_turn);
                 }
+
                 _openNeighbouringMines(mine.index, _current_player_turn);
-                // Notify about any score change
-                onScoreChanged(_current_player_turn, _scores[(int)_current_player_turn]);
                 _changeTurns();
             } else if (mine.isMine()) {
                 /* Up the score of the one who took it */
                 _scores[(int)_current_player_turn] += 1;
-                // Notify about any score change
-                onScoreChanged(_current_player_turn, _scores[(int)_current_player_turn]);
             } else {
                 _changeTurns();
             }
