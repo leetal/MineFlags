@@ -20,6 +20,7 @@ namespace MineFlags
 
         private int[] _scores = new int[2] { 0, 0 };
         private Player _current_player_turn = Player.ONE;
+        private AIPlayer _ai;
 
         // Delegates
         public delegate void MinefieldHandler();
@@ -31,7 +32,7 @@ namespace MineFlags
         public static event MinefieldHandler onResetMinefield;
         public static event TurnHandler announceTurn;
 
-        public MineFlagController(int rows, int columns, int mines)
+        public MineFlagController(int rows, int columns, int mines, bool ai_player = true)
         {
             _rows = rows;
             _columns = columns;
@@ -39,8 +40,13 @@ namespace MineFlags
 
             /* Add our _printMinefield as an EventListener */
             onResetMinefield += _printMinefield;
-
             _buildMinefield();
+
+            /* Should we instantiate an AI Player? */
+            if (ai_player) {
+                Console.WriteLine("Creating an AI player");
+                AIPlayer ai = new AIPlayer(this, rows, columns);
+            }
 
             // Announce the turn directly
             announceTurn(_current_player_turn);
