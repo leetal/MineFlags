@@ -15,10 +15,6 @@ namespace MineFlags
             MineFlagController.onMineOpened += onMineOpened;
         }
 
-        private void _resetMinefield() {
-
-        }
-
         public void onMineOpened(Mine m) {
             Console.WriteLine("[AIPlayer] onMineOpened");
         }

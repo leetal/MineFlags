@@ -25,6 +25,7 @@ namespace MineFlags
         {
 
             MineFlagController.onMineOpened += _handleMineAction;
+            MineFlagController.announceTurn += _handleTurn;
             InitializeComponent();
 
             // Instantiate our MineFlagController
@@ -138,6 +139,10 @@ namespace MineFlags
                     modifiedMine.player = Mine.Player.TWO;
                 }
             }
+        }
+
+        private void _handleTurn(Player player) {
+            Console.WriteLine("Player " + ((player == Player.ONE) ? "ONE" : "TWO"));
         }
 
     }

@@ -5,6 +5,12 @@ using System.Text;
 
 namespace MineFlags
 {
+    public enum Player
+    {
+        ONE = 0,
+        TWO = 1
+    };
+
     class MineFlagController
     {
         private Mine[] _minefield;
@@ -13,6 +19,17 @@ namespace MineFlags
         private int _remaining_mines;
 
         private int[] _scores = new int[2] { 0, 0 };
+        private Player _current_player_turn = Player.ONE;
+
+        // Delegates
+        public delegate void MinefieldHandler();
+        public delegate void TurnHandler(Player player);
+        public delegate void MineHandler(Mine m);
+
+        // Events
+        public static event MineHandler onMineOpened;
+        public static event MinefieldHandler onResetMinefield;
+        public static event TurnHandler announceTurn;
 
         public MineFlagController(int rows, int columns, int mines)
         {
@@ -24,42 +41,44 @@ namespace MineFlags
             onResetMinefield += _printMinefield;
 
             _buildMinefield();
+
+            // Announce the turn directly
+            announceTurn(_current_player_turn);
         }
 
-        public delegate void MineHandler(Mine m);
-        public static event MineHandler onMineOpened;
         public void openMine(int index) {
             Mine mine = _minefield[index];
             if (mine.isOpened())
                 return;
 
+            /* Open the mine and always change turns */
             mine.open();
+            _changeTurns();
 
             if (!mine.isMine() && mine.getNeighbours() == 0) {
-                Console.WriteLine("mine.isEmpty() == true");
-
                 /* Reveal all neighbouring mines if the mine has an value of 0 */
-                List<Mine> mines = _getNeighbouringMines(index, true);
-                foreach (Mine m in mines) {
-                    Console.WriteLine(m.index);
-                    if (!m.isOpened() && !m.isMine()) {
-                        openMine(m.index);
-                    }
+                if (!mine.isOpened() && !mine.isMine()) {
+                    mine.open();
+                    _openNeighbouringMines(mine.index);
                 }
+                _openNeighbouringMines(index);
             } else if (mine.isMine()) {
                 /* Up the score of the one who took it */
+                _scores[(int)_current_player_turn] += 1;
+
+                /* If we found a mine it's our turn again */
+                _changeTurns();
             }
 
             /* Notify everyone about the opened mine */
             if (onMineOpened != null) {
-                Console.WriteLine("SENDING CALLBACKS ON OPENMINE");
                 onMineOpened(mine);
-                }
+            }
+
+            // Notify everyone about the turn
+            announceTurn(_current_player_turn);
         }
 
-        // Private methods
-        public delegate void MinefieldHandler();
-        public static event MinefieldHandler onResetMinefield;
         private void _buildMinefield()
         {
             // Create all the mines in the minefield
@@ -150,6 +169,30 @@ namespace MineFlags
 
                 Console.Write(_minefield[index].toString());
             }
+        }
+
+        private void _openNeighbouringMines(int index)
+        {
+            Mine mine = _minefield[index];
+
+            if (!mine.isMine() && mine.getNeighbours() == 0) {
+                List<Mine> mines = _getNeighbouringMines(index, true);
+                foreach (Mine m in mines) {
+                    if (!m.isOpened() && !m.isMine()) {
+                        m.open();
+                        onMineOpened(m);
+                        _openNeighbouringMines(m.index);
+                    }
+                }
+            }
+        }
+
+        private void _changeTurns()
+        {
+            if (_current_player_turn == Player.ONE)
+                _current_player_turn = Player.TWO;
+            else
+                _current_player_turn = Player.ONE;
         }
 
     }
