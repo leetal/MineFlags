@@ -37,7 +37,7 @@ namespace MineFlags
         }
 
         // destructor
-        ~MineField() 
+        ~MineField()
         {
         }
 
@@ -71,7 +71,7 @@ namespace MineFlags
 
         private void _reStartGame()
         {
-           
+
             this.Controls.Remove(_gameContainer);
             _gameContainer.Dispose();
             _controller.Dispose();
@@ -106,12 +106,12 @@ namespace MineFlags
 
         private void saveGame_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void loadGame_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void exitGame_Click(object sender, EventArgs e)
@@ -121,7 +121,7 @@ namespace MineFlags
                 System.Windows.Forms.Application.Exit();
             }
             else
-        {
+            {
                 System.Environment.Exit(1);
             }
         }
@@ -252,7 +252,7 @@ namespace MineFlags
         }
         private void _handleGameCompleted(Player player)
         {
-            MessageBox.Show(this, "Player "+ ((player == Player.ONE)? "1" : "2") + " won!");
+            MessageBox.Show(this, "Player " + ((player == Player.ONE) ? "1" : "2") + " won!");
             Console.WriteLine("Game completed");
         }
     }

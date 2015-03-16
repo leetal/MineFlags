@@ -17,6 +17,7 @@ namespace MineFlags
         private int _rows;
         private int _columns;
         private int _remaining_mines;
+        private int _mines;
 
         private int[] _scores = new int[2] { 0, 0 };
         private Player _current_player_turn = Player.ONE;
@@ -41,7 +42,8 @@ namespace MineFlags
         {
             _rows = rows;
             _columns = columns;
-            _remaining_mines = mines;
+            _mines = mines;
+            _remaining_mines = _mines;
 
             /* Add our _printMinefield as an EventListener */
             onResetMinefield += _printMinefield;
@@ -101,7 +103,7 @@ namespace MineFlags
                 onMineOpened(mine);
             }
 
-            if (_remaining_mines == 0)
+            if (_remaining_mines == 0 || _remaining_mines < (_mines/2))
             {
                 onGameCompleted(_current_player_turn);
                 return;
