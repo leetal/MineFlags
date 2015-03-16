@@ -151,11 +151,17 @@ namespace MineFlags
             {
                 case Player.ONE:
                     if (_player1Points != null)
+                    {
                         _player1Points.Text = "Player 1 points: " + score.ToString();
+                        _player1Points.Size = new Size(_player1Points.PreferredWidth, _player1Points.PreferredHeight);
+                    }
                     break;
                 case Player.TWO:
                     if (_player2Points != null)
+                    {
                         _player2Points.Text = "Player 2 points: " + score.ToString();
+                        _player2Points.Size = new Size(_player2Points.PreferredWidth, _player2Points.PreferredHeight);
+                    }
                     break;
                 default:
                     break;
