@@ -20,19 +20,20 @@ namespace MineFlags
 
         private int[] _scores = new int[2] { 0, 0 };
         private Player _current_player_turn = Player.ONE;
-        private AIPlayer _ai;
 
         // Delegates
         public delegate void MinefieldHandler();
         public delegate void TurnHandler(Player player);
         public delegate void PlayerScoreChanged(Player player, int score);
         public delegate void MineHandler(Mine m);
+        public delegate void GameCompleted(Player player);
 
         // Events
         public static event MineHandler onMineOpened;
         public static event MinefieldHandler onResetMinefield;
         public static event TurnHandler announceTurn;
         public static event PlayerScoreChanged onScoreChanged;
+        public static event GameCompleted onGameCompleted;
 
         public MineFlagController(int rows, int columns, int mines, bool ai_player = true)
         {
@@ -74,6 +75,8 @@ namespace MineFlags
             } else if (mine.isMine()) {
                 /* Up the score of the one who took it */
                 _scores[(int)_current_player_turn] += 1;
+                _remaining_mines--;
+
                 // Notify about any score change
                 onScoreChanged(_current_player_turn, _scores[(int)_current_player_turn]);
             } else {
@@ -83,6 +86,12 @@ namespace MineFlags
             /* Notify everyone about the opened mine */
             if (onMineOpened != null) {
                 onMineOpened(mine);
+            }
+
+            if (_remaining_mines == 0)
+            {
+                onGameCompleted(_current_player_turn);
+                return;
             }
 
             // Notify everyone about the turn

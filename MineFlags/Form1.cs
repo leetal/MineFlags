@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace MineFlags
 {
@@ -29,7 +30,13 @@ namespace MineFlags
             MineFlagController.onMineOpened += _handleMineAction;
             MineFlagController.announceTurn += _handleTurn;
             MineFlagController.onScoreChanged += _handleScoreChanged;
+            MineFlagController.onGameCompleted += _handleGameCompleted;
             InitializeComponent();
+        }
+
+        // destructor
+        ~MineField() 
+        {
         }
 
         protected override void OnLoad(EventArgs e)
@@ -44,6 +51,7 @@ namespace MineFlags
 
             _mineButtons = new MineButton[ROWS * COLUMNS];
             _startGame(1);
+
             _controller = new MineFlagController(ROWS, COLUMNS, MINES); // Instantiate our MineFlagController
         }
 
@@ -130,23 +138,26 @@ namespace MineFlags
             // Update view accordingly
 
             MineButton modifiedMine = _mineButtons[mine.index];
-            if (mine.isOpened()) {
+            if (mine.isOpened())
+            {
                 modifiedMine.adjacentNeighbours = mine.getNeighbours();
 
-                if (mine.isMine()) {
+                if (mine.isMine())
+                {
                     modifiedMine.player = mine.opened_by;
                 }
             }
         }
 
-        private void _handleTurn(Player player) {
-            if(_playerTurn != null)
+        private void _handleTurn(Player player)
+        {
+            if (_playerTurn != null)
                 _playerTurn.Text = "Player " + ((player == Player.ONE) ? "one's" : "two's") + " turn";
         }
 
         private void _handleScoreChanged(Player player, int score)
         {
-            Console.WriteLine("Player " + player.ToString() + " has a score of " + score.ToString());
+            Console.WriteLine("Player {0} has a score of {1}", player.ToString(), score.ToString());
             switch (player)
             {
                 case Player.ONE:
@@ -166,6 +177,11 @@ namespace MineFlags
                 default:
                     break;
             }
+        }
+
+        private void _handleGameCompleted(Player player)
+        {
+            Console.WriteLine("Game completed");
         }
     }
 }
