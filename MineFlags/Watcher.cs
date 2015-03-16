@@ -10,8 +10,12 @@ namespace MineFlags
     public class Watcher
     {
     	public FileSystemWatcher watcher { get; set; }
+        public String filename;
 
-        public Watcher() { }
+        public Watcher(String path)
+        {
+            this.filename = path;
+        }
 
         public void Run()
         {

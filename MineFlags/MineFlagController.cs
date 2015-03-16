@@ -11,7 +11,7 @@ namespace MineFlags
         TWO = 1
     };
 
-    class MineFlagController
+    public class MineFlagController
     {
         private Mine[] _minefield;
         private int _rows;
@@ -35,6 +35,7 @@ namespace MineFlags
         public static event PlayerScoreChanged onScoreChanged;
         public static event GameCompleted onGameCompleted;
 
+        public MineFlagController() { }
         public MineFlagController(int rows, int columns, int mines, bool ai_player = true)
         {
             _rows = rows;

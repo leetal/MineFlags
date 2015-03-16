@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MineFlags
 {
-    class Mine
+    public class Mine
     {
         private bool _opened = false;
         private int _neighbours = 0;
