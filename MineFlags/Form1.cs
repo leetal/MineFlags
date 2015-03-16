@@ -131,12 +131,11 @@ namespace MineFlags
             // Catch onMineOpened event
             // Update view accordingly
             MineButton modifiedMine = _mineButtons[mine.index];
-            if (mine.isOpened())
-            {
+            if (mine.isOpened()) {
                 modifiedMine.adjacentNeighbours = mine.getNeighbours();
-                if (mine.isMine())
-                {
-                    modifiedMine.player = Mine.Player.TWO;
+
+                if (mine.isMine()) {
+                    modifiedMine.player = mine.opened_by;
                 }
             }
         }

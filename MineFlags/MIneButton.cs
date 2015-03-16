@@ -9,7 +9,7 @@ namespace MineFlags
     class MineButton : Button
     {
         private int _adjacentNeighbours;
-        private Mine.Player _player;
+        private Player _player;
 
         public int adjacentNeighbours
         {
@@ -23,17 +23,14 @@ namespace MineFlags
             }
         }
 
-        public Mine.Player player
+        public Player player
         {
             get { return _player; }
             set { 
                 _player = value;
-                if (_player == Mine.Player.ONE)
-                {
+                if (_player == Player.ONE) {
                     this.BackColor = System.Drawing.Color.FromArgb(255, 231, 76, 60); // One (ALZARIN)
-                }
-                else
-                {
+                } else {
                     this.BackColor = System.Drawing.Color.FromArgb(255, 52, 73, 94); // Two (wet asphalt)
                 }
             }

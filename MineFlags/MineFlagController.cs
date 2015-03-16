@@ -58,21 +58,20 @@ namespace MineFlags
                 return;
 
             /* Open the mine and always change turns */
-            mine.open();
-            _changeTurns();
+            mine.open(_current_player_turn);
 
             if (!mine.isMine() && mine.getNeighbours() == 0) {
                 /* Reveal all neighbouring mines if the mine has an value of 0 */
                 if (!mine.isOpened() && !mine.isMine()) {
-                    mine.open();
-                    _openNeighbouringMines(mine.index);
+                    mine.open(_current_player_turn);
                 }
-                _openNeighbouringMines(index);
+
+                _openNeighbouringMines(mine.index, _current_player_turn);
+                _changeTurns();
             } else if (mine.isMine()) {
                 /* Up the score of the one who took it */
                 _scores[(int)_current_player_turn] += 1;
-
-                /* If we found a mine it's our turn again */
+            } else {
                 _changeTurns();
             }
 
@@ -177,7 +176,7 @@ namespace MineFlags
             }
         }
 
-        private void _openNeighbouringMines(int index)
+        private void _openNeighbouringMines(int index, Player p)
         {
             Mine mine = _minefield[index];
 
@@ -185,9 +184,9 @@ namespace MineFlags
                 List<Mine> mines = _getNeighbouringMines(index, true);
                 foreach (Mine m in mines) {
                     if (!m.isOpened() && !m.isMine()) {
-                        m.open();
+                        m.open(p);
                         onMineOpened(m);
-                        _openNeighbouringMines(m.index);
+                        _openNeighbouringMines(m.index, p);
                     }
                 }
             }
