@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 
 namespace MineFlags
 {
@@ -20,6 +19,13 @@ namespace MineFlags
 
             MineFlagController.onMineOpened += onMineOpened;
             MineFlagController.announceTurn += _handleTurn;
+        }
+
+        public void Dispose()
+        {
+            MineFlagController.onMineOpened -= onMineOpened;
+            MineFlagController.announceTurn -= _handleTurn;
+            _controller = null;
         }
 
         public void onMineOpened(Mine m) {

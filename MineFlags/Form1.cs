@@ -17,7 +17,7 @@ namespace MineFlags
         public const int BUTTONSIZE = 32;
         public static int ROWS = 16;
         public static int COLUMNS = 16;
-        public static int MINES = 1;
+        public static int MINES = 50;
         private MineFlagController _controller;
         private MineButton[] _mineButtons;
         private Panel _gameContainer;
@@ -27,10 +27,6 @@ namespace MineFlags
 
         public MineField()
         {
-            MineFlagController.onMineOpened += _handleMineAction;
-            MineFlagController.announceTurn += _handleTurn;
-            MineFlagController.onScoreChanged += _handleScoreChanged;
-            MineFlagController.onGameCompleted += _handleGameCompleted;
             InitializeComponent();
         }
 
@@ -46,43 +42,82 @@ namespace MineFlags
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            // Add event handlers
+            MineFlagController.onMineOpened += _handleMineAction;
+            MineFlagController.announceTurn += _handleTurn;
+            MineFlagController.onScoreChanged += _handleScoreChanged;
+            MineFlagController.onGameCompleted += _handleGameCompleted;
+
             // Static size on the game
             this.ClientSize = new Size((COLUMNS * BUTTONSIZE + PADDING * 2), (ROWS * BUTTONSIZE + PADDING * 2) + HEADERHEIGHT);
             _createMenu();
             _mineButtons = new MineButton[ROWS * COLUMNS];
-            _startGame(1);
-
-            _controller = new MineFlagController(ROWS, COLUMNS, MINES); // Instantiate our MineFlagController
+            _startGame();
         }
 
-        private void _startGame(int type)
+        private void _startGame()
         {
             _setupContainer(this.ClientSize);
             _setupHeader(this.ClientSize);
             _setupMinebuttons(this.ClientSize);
+            _controller = new MineFlagController(ROWS, COLUMNS, MINES); // Instantiate our MineFlagController
+        }
+
+        private void _reStartGame()
+        {
+           
+            this.Controls.Remove(_gameContainer);
+            _gameContainer.Dispose();
+            _controller.Dispose();
+            _controller = null;
+            _startGame();
         }
 
         private void _createMenu()
         {
             MenuStrip menu = new MenuStrip();
+            menu.BackColor = System.Drawing.Color.FromKnownColor(KnownColor.ControlLight);
 
-            ToolStripMenuItem fileItem = new ToolStripMenuItem("&File");
-
-            // Create our first item with an image and wired to a click event
-            // Also sets Alt + 7 as the shortcut
-            ToolStripMenuItem itemWithEventAndKey = new ToolStripMenuItem("Delete Event", null, deleteItem_Click, (Keys)Shortcut.Alt7);
-
+            ToolStripMenuItem fileItem = new ToolStripMenuItem("File");
+            ToolStripMenuItem itemWithEventAndKey = new ToolStripMenuItem("New Game", null, newGame_Click, (Keys)Shortcut.Alt1);
+            fileItem.DropDownItems.Add(itemWithEventAndKey);
+            itemWithEventAndKey = new ToolStripMenuItem("Save Game", null, saveGame_Click, (Keys)Shortcut.Alt2);
+            fileItem.DropDownItems.Add(itemWithEventAndKey);
+            itemWithEventAndKey = new ToolStripMenuItem("Load Game", null, loadGame_Click, (Keys)Shortcut.Alt3);
+            fileItem.DropDownItems.Add(itemWithEventAndKey);
+            itemWithEventAndKey = new ToolStripMenuItem("Exit", null, exitGame_Click, (Keys)Shortcut.Alt4);
             fileItem.DropDownItems.Add(itemWithEventAndKey);
 
             menu.Items.Add(fileItem);
-
             this.Controls.Add(menu);
         }
 
         // Event that is called from menu item.
-        private void deleteItem_Click(object sender, EventArgs e)
+        private void newGame_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Delete Event");
+            _reStartGame();
+        }
+
+        private void saveGame_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void loadGame_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void exitGame_Click(object sender, EventArgs e)
+        {
+            if (System.Windows.Forms.Application.MessageLoop)
+            {
+                System.Windows.Forms.Application.Exit();
+            }
+            else
+            {
+                System.Environment.Exit(1);
+            }
         }
 
         private void _setupContainer(Size size)
@@ -204,7 +239,7 @@ namespace MineFlags
 
         private void _handleGameCompleted(Player player)
         {
-            _gameContainer.Hide();
+            MessageBox.Show(this, "Player "+ ((player == Player.ONE)? "1" : "2") + " won!");
             Console.WriteLine("Game completed");
         }
     }
