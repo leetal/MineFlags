@@ -20,6 +20,7 @@ namespace MineFlags
 
         private int[] _scores = new int[2] { 0, 0 };
         private Player _current_player_turn = Player.ONE;
+        private AIPlayer _ai;
 
         // Delegates
         public delegate void MinefieldHandler();
@@ -33,7 +34,7 @@ namespace MineFlags
         public static event TurnHandler announceTurn;
         public static event PlayerScoreChanged onScoreChanged;
 
-        public MineFlagController(int rows, int columns, int mines)
+        public MineFlagController(int rows, int columns, int mines, bool ai_player = true)
         {
             _rows = rows;
             _columns = columns;
@@ -41,8 +42,13 @@ namespace MineFlags
 
             /* Add our _printMinefield as an EventListener */
             onResetMinefield += _printMinefield;
-
             _buildMinefield();
+
+            /* Should we instantiate an AI Player? */
+            if (ai_player) {
+                Console.WriteLine("Creating an AI player");
+                AIPlayer ai = new AIPlayer(this, rows, columns);
+            }
 
             // Announce the turn directly
             announceTurn(_current_player_turn);
@@ -54,35 +60,30 @@ namespace MineFlags
                 return;
 
             /* Open the mine and always change turns */
-            mine.open();
-
-            bool shouldChangeTurn = true;
+            mine.open(_current_player_turn);
 
             if (!mine.isMine() && mine.getNeighbours() == 0) {
                 /* Reveal all neighbouring mines if the mine has an value of 0 */
                 if (!mine.isOpened() && !mine.isMine()) {
-                    mine.open();
-                    _openNeighbouringMines(mine.index);
+                    mine.open(_current_player_turn);
                 }
-                _openNeighbouringMines(index);
+                _openNeighbouringMines(mine.index, _current_player_turn);
+                // Notify about any score change
+                onScoreChanged(_current_player_turn, _scores[(int)_current_player_turn]);
+                _changeTurns();
             } else if (mine.isMine()) {
                 /* Up the score of the one who took it */
                 _scores[(int)_current_player_turn] += 1;
-
-                /* If we found a mine it's our turn again */
-                shouldChangeTurn = false;
+                // Notify about any score change
+                onScoreChanged(_current_player_turn, _scores[(int)_current_player_turn]);
+            } else {
+                _changeTurns();
             }
 
             /* Notify everyone about the opened mine */
             if (onMineOpened != null) {
                 onMineOpened(mine);
             }
-
-            // Notify about any score change
-            onScoreChanged(_current_player_turn, _scores[(int)_current_player_turn]);
-
-            if (shouldChangeTurn)
-                _changeTurns();
 
             // Notify everyone about the turn
             announceTurn(_current_player_turn);
@@ -180,7 +181,7 @@ namespace MineFlags
             }
         }
 
-        private void _openNeighbouringMines(int index)
+        private void _openNeighbouringMines(int index, Player p)
         {
             Mine mine = _minefield[index];
 
@@ -188,9 +189,9 @@ namespace MineFlags
                 List<Mine> mines = _getNeighbouringMines(index, true);
                 foreach (Mine m in mines) {
                     if (!m.isOpened() && !m.isMine()) {
-                        m.open();
+                        m.open(p);
                         onMineOpened(m);
-                        _openNeighbouringMines(m.index);
+                        _openNeighbouringMines(m.index, p);
                     }
                 }
             }

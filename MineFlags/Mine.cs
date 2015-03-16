@@ -7,17 +7,12 @@ namespace MineFlags
 {
     class Mine
     {
-        public enum Player
-        {
-            ONE,
-            TWO
-        };
-
         private bool _opened = false;
         private int _neighbours = 0;
         private bool _mine = false;
         private int _column;
         private int _row;
+        private Player _opened_by;
 
         public Mine(int row, int column)
         {
@@ -28,6 +23,11 @@ namespace MineFlags
         public int row
         {
             get { return _row;  }
+        }
+
+        public Player opened_by
+        {
+            get { return _opened_by;  }
         }
 
         public int column
@@ -60,8 +60,9 @@ namespace MineFlags
             return _neighbours;
         }
 
-        public void open() {
+        public void open(Player p) {
             _opened = true;
+            _opened_by = p;
         }
 
         public bool isOpened() {
