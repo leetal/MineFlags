@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace MineFlags
 {
@@ -101,14 +102,12 @@ namespace MineFlags
         {
             try
             {
-                if (!_saving)
-                {
-                    // TODO: Get the state from statehandler
-                }
+                // Get the state from statehandler
+                State state = StateHandler.importFromStorage(FILENAME);
             }
             catch (Exception e)
             {
-                //  MessageBox.Show("What" + e);
+                MessageBox.Show("What" + e);
             }
         }
 
