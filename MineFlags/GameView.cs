@@ -49,24 +49,30 @@ namespace MineFlags
             this.ClientSize = new Size((COLUMNS * BUTTONSIZE + PADDING * 2), (ROWS * BUTTONSIZE + PADDING * 2) + HEADERHEIGHT);
             _createMenu();
             _mineButtons = new MineButton[ROWS * COLUMNS];
-            _startGame();
+            //_startGame();
         }
 
-        private void _startGame()
+        private void _startGame(bool ai)
         {
             _setupContainer(this.ClientSize);
             _setupHeader(this.ClientSize);
             _setupMinebuttons(this.ClientSize);
-            _controller = new MineFlagController(ROWS, COLUMNS, MINES); // Instantiate our MineFlagController
+            _controller = new MineFlagController(ROWS, COLUMNS, MINES, ai); // Instantiate our MineFlagController
         }
 
-        private void _reStartGame()
+        private void _reStartGame(bool ai)
         {
-            this.Controls.Remove(_gameContainer);
-            _gameContainer.Dispose();
-            _controller.Dispose();
+            if (_gameContainer != null)
+            {
+                this.Controls.Remove(_gameContainer);
+                _gameContainer.Dispose();
+            }
+
+            if(_controller != null)
+                _controller.Dispose();
+
             _controller = null;
-            _startGame();
+            _startGame(ai);
         }
 
         private void _createMenu()
@@ -75,7 +81,11 @@ namespace MineFlags
             menu.BackColor = System.Drawing.Color.FromKnownColor(KnownColor.ControlLight);
 
             ToolStripMenuItem fileItem = new ToolStripMenuItem("File");
-            ToolStripMenuItem itemWithEventAndKey = new ToolStripMenuItem("New Game", null, newGame_Click, (Keys)Shortcut.Alt1);
+            ToolStripMenuItem itemWithEventAndKey = new ToolStripMenuItem("New Game");
+            ToolStripMenuItem subitemWithEventAndKey = new ToolStripMenuItem("New Game with other player", null, newGame_Click, (Keys)Shortcut.CtrlN);
+            itemWithEventAndKey.DropDownItems.Add(subitemWithEventAndKey);
+            subitemWithEventAndKey = new ToolStripMenuItem("New Game with AI", null, newGameAI_Click, (Keys)Shortcut.CtrlA);
+            itemWithEventAndKey.DropDownItems.Add(subitemWithEventAndKey);
             fileItem.DropDownItems.Add(itemWithEventAndKey);
             itemWithEventAndKey = new ToolStripMenuItem("Save Game", null, saveGame_Click, (Keys)Shortcut.Alt2);
             fileItem.DropDownItems.Add(itemWithEventAndKey);
@@ -91,7 +101,12 @@ namespace MineFlags
         // Event that is called from menu item.
         private void newGame_Click(object sender, EventArgs e)
         {
-            _reStartGame();
+            _reStartGame(false);
+        }
+
+        private void newGameAI_Click(object sender, EventArgs e)
+        {
+            _reStartGame(true);
         }
 
         private void saveGame_Click(object sender, EventArgs e)

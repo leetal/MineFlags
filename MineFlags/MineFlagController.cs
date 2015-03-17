@@ -79,9 +79,12 @@ namespace MineFlags
 
         public void Dispose()
         {
-            _watcher.Dispose();
+            if (_watcher != null)
+                _watcher.Dispose();
             _watcher = null;
-            _ai.Dispose();
+
+            if(_ai != null)
+                _ai.Dispose();
             _ai = null;
         }
 
