@@ -83,7 +83,6 @@ namespace MineFlags
             _watcher = null;
             _ai.Dispose();
             _ai = null;
-            GC.SuppressFinalize(this);
         }
 
         // State handling
@@ -92,9 +91,8 @@ namespace MineFlags
             try
             {
                 _saving = true;
-                // LINQ HERE
-                //List<Pawn> pawns = (from pawn in grid where pawn.GetType() == typeof(Pawn) select (Pawn)pawn).ToList();
-                State saveGame = new State(_minefield, _rows, _columns, _mines, _remaining_mines, _scores, _current_player_turn, _ai);
+                List<Mine> mines = (from mine in _minefield where mine.GetType() == typeof(Mine) select (Mine)mine).ToList();
+                State saveGame = new State(mines, _rows, _columns, _mines, _remaining_mines, _scores, _current_player_turn, _ai);
                 StateHandler.exportToStorage(saveGame, FILENAME);
                 _saving = false;
             }
