@@ -22,8 +22,8 @@ namespace MineFlags
         private int _remaining_mines;
         private int _mines;
         private bool _saving = false;
-        private int[] _scores = new int[2] { 0, 0 };
-        private Player _current_player_turn = Player.ONE;
+        private int[] _scores;
+        private Player _current_player_turn;
 
         private AIPlayer _ai;
 
@@ -63,6 +63,8 @@ namespace MineFlags
 
         public void NewGame(int rows, int columns, int mines, bool ai_player)
         {
+            _scores = new int[2] { 0, 0 };
+            _current_player_turn = Player.ONE;
             _rows = rows;
             _columns = columns;
             _mines = mines;
