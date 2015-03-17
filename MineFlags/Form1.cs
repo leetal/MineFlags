@@ -17,7 +17,7 @@ namespace MineFlags
         public const int BUTTONSIZE = 32;
         public static int ROWS = 16;
         public static int COLUMNS = 16;
-        public static int MINES = 1;
+        public static int MINES = 50;
         private const String FILENAME = "data.xml";
         private MineFlagController _controller;
         private MineButton[] _mineButtons;
@@ -25,7 +25,6 @@ namespace MineFlags
         private Label _player1Points;
         private Label _player2Points;
         private Label _playerTurn;
-        private bool _saving = false;
 
         public Watcher watcher { get; set; }
         public MineField()
@@ -34,6 +33,7 @@ namespace MineFlags
 
             // Create a watcher for keeping track on game updates
             watcher = new Watcher(FILENAME);
+            watcher.Run();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -123,7 +123,6 @@ namespace MineFlags
 
         private void _setupContainer(Size size)
         {
-            Console.WriteLine("Width:" + size.Width.ToString() + ", Height: " + size.Height.ToString());
             // Add a container for all controls
             _gameContainer = new Panel();
             _gameContainer.Size = new Size(size.Width - 2 * PADDING, size.Height - 2 * PADDING);
@@ -185,14 +184,12 @@ namespace MineFlags
         {
             MineButton caller = (MineButton)sender;
             int clickedIndex = (int)caller.Tag;
-            Console.WriteLine("Button click at:" + clickedIndex.ToString());
             // Handle mine open event
             _controller.openMine(clickedIndex);
         }
 
         private void _handleMineAction(Mine mine)
         {
-            Console.WriteLine("Mineaction cathced: " + mine.index.ToString());
             // Catch onMineOpened event
             // Update view accordingly
 
@@ -248,7 +245,6 @@ namespace MineFlags
         private void _handleGameCompleted(Player player)
         {
             MessageBox.Show(this, "Player " + ((player == Player.ONE) ? "1" : "2") + " won!");
-            Console.WriteLine("Game completed");
         }
     }
 }

@@ -51,7 +51,6 @@ namespace MineFlags
 
             /* Should we instantiate an AI Player? */
             if (ai_player) {
-                Console.WriteLine("Creating an AI player");
                 _ai = new AIPlayer(this, rows, columns);
             }
 
