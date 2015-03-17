@@ -44,13 +44,23 @@ namespace MineFlags
         public MineFlagController() { }
         public MineFlagController(int rows, int columns, int mines, bool ai_player = true)
         {
+            NewGame(rows, columns, mines, ai_player);
+        }
+
+        ~MineFlagController() 
+        {
+            Console.WriteLine("Dealloc of MineFlagController");
+        }
+
+        public void NewGame(int rows, int columns, int mines, bool ai_player = true)
+        {
             _rows = rows;
             _columns = columns;
             _mines = mines;
             _remaining_mines = _mines;
 
             // Create a watcher for keeping track on game updates
-            _watcher = new Watcher(FILENAME);
+            _watcher = new Watcher(FILENAME, this);
             _watcher.Run();
 
             /* Add our _printMinefield as an EventListener */
@@ -66,13 +76,10 @@ namespace MineFlags
             announceTurn(_current_player_turn);
         }
 
-        ~MineFlagController() 
-        {
-            Console.WriteLine("Dealloc of MineFlagController");
-        }
-
         public void Dispose()
         {
+            _watcher.Dispose();
+            _watcher = null;
             _ai.Dispose();
             _ai = null;
             GC.SuppressFinalize(this);

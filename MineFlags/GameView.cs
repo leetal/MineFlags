@@ -62,7 +62,6 @@ namespace MineFlags
 
         private void _reStartGame()
         {
-
             this.Controls.Remove(_gameContainer);
             _gameContainer.Dispose();
             _controller.Dispose();
@@ -108,6 +107,7 @@ namespace MineFlags
 
         private void exitGame_Click(object sender, EventArgs e)
         {
+            // Gracefully shutdown
             if (System.Windows.Forms.Application.MessageLoop)
             {
                 System.Windows.Forms.Application.Exit();
@@ -132,14 +132,14 @@ namespace MineFlags
         {
             _player1Points = new Label();
             _player1Points.ImageAlign = ContentAlignment.TopLeft;
-            _player1Points.Location = new System.Drawing.Point(PADDING, PADDING);
+            _player1Points.Location = new System.Drawing.Point(PADDING, 4 * PADDING);
             _player1Points.UseMnemonic = true;
             _player1Points.Text = "Player 1 points: 0";
             _player1Points.Size = new Size(_player1Points.PreferredWidth, _player1Points.PreferredHeight);
 
             _player2Points = new Label();
             _player2Points.ImageAlign = ContentAlignment.TopLeft;
-            _player2Points.Location = new System.Drawing.Point(PADDING, 3 * PADDING);
+            _player2Points.Location = new System.Drawing.Point(PADDING, 6 * PADDING);
             _player2Points.UseMnemonic = true;
             _player2Points.Text = "Player 2 points: 0";
             _player2Points.Size = new Size(_player2Points.PreferredWidth, _player2Points.PreferredHeight);

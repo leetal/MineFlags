@@ -11,9 +11,21 @@ namespace MineFlags
     public class Watcher
     {
     	public FileSystemWatcher watcher { get; set; }
-        public String path;
+        private String _filename;
+        private MineFlagController _controller;
 
-        public Watcher(String path) { }
+        public Watcher(String path, MineFlagController controller) 
+        {
+            _controller = controller;
+            _filename = path;
+        }
+
+        public void Dispose()
+        {
+            _controller = null;
+            watcher.Changed -= handleChange;
+            watcher = null;
+        }
 
         [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
         public void Run()
@@ -25,7 +37,7 @@ namespace MineFlags
             // Set some filters for changes
             watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
                                  | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-            watcher.Filter = "*";
+            watcher.Filter = _filename;
 
             // Attach callbacks
             watcher.Changed += handleChange;
@@ -37,6 +49,10 @@ namespace MineFlags
         private void handleChange(object source, FileSystemEventArgs args)
         {
             Console.WriteLine("File: " + args.FullPath + " " + args.ChangeType);
+            watcher.EnableRaisingEvents = false;
+            if(_controller != null)
+                _controller.ContinueGame();
+            watcher.EnableRaisingEvents = true;
         }
     }
 }
