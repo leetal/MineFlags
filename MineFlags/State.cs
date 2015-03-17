@@ -5,8 +5,10 @@ using System.Text;
 
 namespace MineFlags
 {
-    class State
+    public class State
     {
+        public State() { }
+
         public State(Mine[] minefield, int rows, int columns, int mines, int remaining_mines, int[] scores, Player current_player_turn)
         {
             this.minefield = minefield;

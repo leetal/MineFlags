@@ -90,8 +90,9 @@ namespace MineFlags
                 StateHandler.exportToStorage(saveGame, FILENAME);
                 _saving = false;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine(e.ToString());
             }
         }
 

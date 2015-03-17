@@ -15,6 +15,8 @@ namespace MineFlags
         public int _row { get; set; }
         public Player _opened_by { get; set; }
 
+        public Mine() { }
+
         public Mine(int row, int column)
         {
             _row = row;
