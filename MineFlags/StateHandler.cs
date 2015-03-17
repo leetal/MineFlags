@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 
 namespace MineFlags
 {
-    internal class StateHandler
+    public class StateHandler
     {
         public static void exportToStorage(State state, String filename)
         {
@@ -25,9 +25,20 @@ namespace MineFlags
             writer.Close();
         }
 
-        public static void importFromStorage<T>(String filename)
+        public static State importFromStorage(String filename)
         {
             // Deserialize
+            XmlSerializer serializer = new XmlSerializer(typeof(State));
+
+            // Open the file stream
+            State state;
+            Stream reader = new FileStream(filename, FileMode.Open);
+            state = (State)serializer.Deserialize(reader);
+
+            // Close the file
+            reader.Close();
+
+            return state;
         }
     }
 }
