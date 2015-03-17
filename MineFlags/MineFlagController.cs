@@ -48,7 +48,10 @@ namespace MineFlags
             if (File.Exists(FILENAME)) {
                 ContinueGame();
                 Console.WriteLine("_remaining_mines => " + _remaining_mines);
+
                 // Announce the turn directly
+                onScoreChanged(Player.ONE, _scores[(int)Player.ONE]);
+                onScoreChanged(Player.TWO, _scores[(int)Player.TWO]);
                 announceTurn(_current_player_turn);
             }             
         }
