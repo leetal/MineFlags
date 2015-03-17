@@ -43,18 +43,14 @@ namespace MineFlags
         public static event PlayerScoreChanged onScoreChanged;
         public static event GameCompleted onGameCompleted;
 
-        public MineFlagController() { }
-        public MineFlagController(int rows, int columns, int mines, bool ai_player = true)
+        public MineFlagController()
         {
             if (File.Exists(FILENAME)) {
                 ContinueGame();
                 Console.WriteLine("_remaining_mines => " + _remaining_mines);
-            } else {
-                NewGame(rows, columns, mines, ai_player);
-            }
-
-            // Announce the turn directly
-            announceTurn(_current_player_turn);
+                // Announce the turn directly
+                announceTurn(_current_player_turn);
+            }             
         }
 
         ~MineFlagController() 
@@ -62,7 +58,7 @@ namespace MineFlags
             Console.WriteLine("Dealloc of MineFlagController");
         }
 
-        public void NewGame(int rows, int columns, int mines, bool ai_player = true)
+        public void NewGame(int rows, int columns, int mines, bool ai_player)
         {
             _rows = rows;
             _columns = columns;

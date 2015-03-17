@@ -49,18 +49,21 @@ namespace MineFlags
             this.ClientSize = new Size((COLUMNS * BUTTONSIZE + PADDING * 2), (ROWS * BUTTONSIZE + PADDING * 2) + HEADERHEIGHT);
             _createMenu();
             _mineButtons = new MineButton[ROWS * COLUMNS];
-            //_startGame();
+            _startGame();
         }
 
-        private void _startGame(bool ai)
+        private void _startGame()
         {
             _setupContainer(this.ClientSize);
             _setupHeader(this.ClientSize);
             _setupMinebuttons(this.ClientSize);
-            _controller = new MineFlagController(ROWS, COLUMNS, MINES, ai); // Instantiate our MineFlagController
+
+            // Must exists POST-init of controls
+            if (_controller == null)
+                _controller = new MineFlagController(); // Instantiate our MineFlagController
         }
 
-        private void _reStartGame(bool ai)
+        private void _newGame(bool ai)
         {
             if (_gameContainer != null)
             {
@@ -68,11 +71,11 @@ namespace MineFlags
                 _gameContainer.Dispose();
             }
 
-            if(_controller != null)
-                _controller.Dispose();
+            // New game!
+            if (_controller != null)
+                _controller.NewGame(ROWS, COLUMNS, MINES, ai);
 
-            _controller = null;
-            _startGame(ai);
+            _startGame();
         }
 
         private void _createMenu()
@@ -101,12 +104,12 @@ namespace MineFlags
         // Event that is called from menu item.
         private void newGame_Click(object sender, EventArgs e)
         {
-            _reStartGame(false);
+            _newGame(false);
         }
 
         private void newGameAI_Click(object sender, EventArgs e)
         {
-            _reStartGame(true);
+            _newGame(true);
         }
 
         private void saveGame_Click(object sender, EventArgs e)
