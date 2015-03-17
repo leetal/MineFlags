@@ -86,7 +86,7 @@ namespace MineFlags
                 _saving = true;
                 // LINQ HERE
                 //List<Pawn> pawns = (from pawn in grid where pawn.GetType() == typeof(Pawn) select (Pawn)pawn).ToList();
-                State saveGame = new State(_minefield, _rows, _columns, _mines, _remaining_mines, _scores, _current_player_turn);
+                State saveGame = new State(_minefield, _rows, _columns, _mines, _remaining_mines, _scores, _current_player_turn, _ai);
                 StateHandler.exportToStorage(saveGame, FILENAME);
                 _saving = false;
             }
