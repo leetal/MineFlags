@@ -172,7 +172,7 @@ namespace MineFlags
                 onMineOpened(mine);
             }
 
-            if (_remaining_mines == 0 || _remaining_mines < (_mines/2))
+            if (_remaining_mines == 0 || ((_scores[0] > _mines / 2) || (_scores[1] > _mines / 2)))
             {
                 onGameCompleted(_current_player_turn);
                 return;

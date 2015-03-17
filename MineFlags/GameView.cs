@@ -90,11 +90,7 @@ namespace MineFlags
             subitemWithEventAndKey = new ToolStripMenuItem("New Game with AI", null, newGameAI_Click, (Keys)Shortcut.CtrlA);
             itemWithEventAndKey.DropDownItems.Add(subitemWithEventAndKey);
             fileItem.DropDownItems.Add(itemWithEventAndKey);
-            itemWithEventAndKey = new ToolStripMenuItem("Save Game", null, saveGame_Click, (Keys)Shortcut.Alt2);
-            fileItem.DropDownItems.Add(itemWithEventAndKey);
-            itemWithEventAndKey = new ToolStripMenuItem("Load Game", null, loadGame_Click, (Keys)Shortcut.Alt3);
-            fileItem.DropDownItems.Add(itemWithEventAndKey);
-            itemWithEventAndKey = new ToolStripMenuItem("Exit", null, exitGame_Click, (Keys)Shortcut.Alt4);
+            itemWithEventAndKey = new ToolStripMenuItem("Exit", null, exitGame_Click, (Keys)Shortcut.AltF4);
             fileItem.DropDownItems.Add(itemWithEventAndKey);
 
             menu.Items.Add(fileItem);
@@ -110,17 +106,6 @@ namespace MineFlags
         private void newGameAI_Click(object sender, EventArgs e)
         {
             _newGame(true);
-        }
-
-        private void saveGame_Click(object sender, EventArgs e)
-        {
-            if (_controller != null)
-                _controller.SaveState();
-        }
-
-        private void loadGame_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void exitGame_Click(object sender, EventArgs e)
