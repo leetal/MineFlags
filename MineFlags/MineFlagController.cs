@@ -228,6 +228,5 @@ namespace MineFlags
             else
                 _current_player_turn = Player.ONE;
         }
-
     }
 }

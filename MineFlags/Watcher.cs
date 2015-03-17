@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
+using System.Security.Permissions;
 
 namespace MineFlags
 {
@@ -17,6 +18,7 @@ namespace MineFlags
             this.filename = path;
         }
 
+        [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
         public void Run()
         {
             // Create a FileSystemWatcher

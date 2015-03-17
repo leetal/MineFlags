@@ -17,7 +17,7 @@ namespace MineFlags
         public const int BUTTONSIZE = 32;
         public static int ROWS = 16;
         public static int COLUMNS = 16;
-        public static int MINES = 50;
+        public static int MINES = 1;
         private const String FILENAME = "data.xml";
         private MineFlagController _controller;
         private MineButton[] _mineButtons;
@@ -34,11 +34,6 @@ namespace MineFlags
 
             // Create a watcher for keeping track on game updates
             watcher = new Watcher(FILENAME);
-        }
-
-        // destructor
-        ~MineField()
-        {
         }
 
         protected override void OnLoad(EventArgs e)
@@ -248,7 +243,7 @@ namespace MineFlags
         private void _saveState()
         {
             Console.WriteLine("--> About to save the state");
-            StateHandler.exportToStorage(_controller, "C:\\Users\\André\\asdf.xml");
+            StateHandler.exportToStorage(_controller, FILENAME);
         }
         private void _handleGameCompleted(Player player)
         {
