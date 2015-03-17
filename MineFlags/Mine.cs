@@ -5,29 +5,33 @@ using System.Text;
 
 namespace MineFlags
 {
+    [Serializable]
     public class Mine
     {
-        private bool _opened = false;
-        private int _neighbours = 0;
-        private bool _mine = false;
-        private int _column;
-        private int _row;
-        private Player _opened_by;
+        public bool _opened { get; set; }
+        public int _neighbours { get; set; }
+        public bool _mine { get; set; }
+        public int _column { get; set; }
+        public int _row { get; set; }
+        public Player _opened_by { get; set; }
 
         public Mine(int row, int column)
         {
             _row = row;
             _column = column;
+            _opened = false;
+            _neighbours = 0;
+            _mine = false;
         }
 
         public int row
         {
-            get { return _row;  }
+            get { return _row; }
         }
 
         public Player opened_by
         {
-            get { return _opened_by;  }
+            get { return _opened_by; }
         }
 
         public int column
@@ -35,7 +39,8 @@ namespace MineFlags
             get { return _column; }
         }
 
-        public int index {
+        public int index
+        {
             get { return (_row * MineField.ROWS) + _column; }
         }
 
@@ -49,23 +54,27 @@ namespace MineFlags
             _mine = value;
         }
 
-        public void increaseNeighbours() {
+        public void increaseNeighbours()
+        {
             _neighbours++;
         }
 
-        public int getNeighbours() {
+        public int getNeighbours()
+        {
             if (isMine())
                 return 0;
 
             return _neighbours;
         }
 
-        public void open(Player p) {
+        public void open(Player p)
+        {
             _opened = true;
             _opened_by = p;
         }
 
-        public bool isOpened() {
+        public bool isOpened()
+        {
             return _opened;
         }
 

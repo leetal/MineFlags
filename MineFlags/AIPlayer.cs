@@ -5,10 +5,11 @@ using System.Text;
 
 namespace MineFlags
 {
+    [Serializable]
     class AIPlayer
     {
         private MineFlagController _controller;
-        private bool[] _opened_minefield;
+        public bool[] _opened_minefield { get; set; }
 
         public AIPlayer(MineFlagController controller, int rows, int columns) {
             /* Keep the reference to the controller */

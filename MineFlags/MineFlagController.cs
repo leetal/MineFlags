@@ -13,15 +13,19 @@ namespace MineFlags
 
     public class MineFlagController
     {
+        private const String FILENAME = "data.xml";
         private Mine[] _minefield;
         private int _rows;
         private int _columns;
         private int _remaining_mines;
         private int _mines;
-
+        private bool _saving = false;
         private int[] _scores = new int[2] { 0, 0 };
         private Player _current_player_turn = Player.ONE;
+
         private AIPlayer _ai;
+
+        public Watcher _watcher { get; set; }
 
         // Delegates
         public delegate void MinefieldHandler();
@@ -44,6 +48,10 @@ namespace MineFlags
             _columns = columns;
             _mines = mines;
             _remaining_mines = _mines;
+
+            // Create a watcher for keeping track on game updates
+            _watcher = new Watcher(FILENAME);
+            _watcher.Run();
 
             /* Add our _printMinefield as an EventListener */
             onResetMinefield += _printMinefield;
@@ -69,6 +77,39 @@ namespace MineFlags
             _ai.Dispose();
             _ai = null;
             GC.SuppressFinalize(this);
+        }
+
+        // State handling
+        public void SaveState()
+        {
+            try
+            {
+                _saving = true;
+                // LINQ HERE
+                //List<Pawn> pawns = (from pawn in grid where pawn.GetType() == typeof(Pawn) select (Pawn)pawn).ToList();
+                State saveGame = new State(_minefield, _rows, _columns, _mines, _remaining_mines, _scores, _current_player_turn);
+                StateHandler.exportToStorage(saveGame, FILENAME);
+                _saving = false;
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+
+        public void ContinueGame()
+        {
+            try
+            {
+                if (!_saving)
+                {
+                    // TODO: Get the state from statehandler
+                }
+            }
+            catch (Exception e)
+            {
+                //  MessageBox.Show("What" + e);
+            }
         }
 
         public void openMine(int index) {

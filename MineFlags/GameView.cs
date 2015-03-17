@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 
+// LINQ: https://msdn.microsoft.com/en-us/library/bb308959.aspx
+
 namespace MineFlags
 {
     public partial class MineField : Form
@@ -18,22 +20,16 @@ namespace MineFlags
         public static int ROWS = 16;
         public static int COLUMNS = 16;
         public static int MINES = 1;
-        private const String FILENAME = "data.xml";
         private MineFlagController _controller;
         private MineButton[] _mineButtons;
         private Panel _gameContainer;
         private Label _player1Points;
         private Label _player2Points;
         private Label _playerTurn;
-        private bool _saving = false;
 
-        public Watcher watcher { get; set; }
         public MineField()
         {
             InitializeComponent();
-
-            // Create a watcher for keeping track on game updates
-            watcher = new Watcher(FILENAME);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -101,7 +97,8 @@ namespace MineFlags
 
         private void saveGame_Click(object sender, EventArgs e)
         {
-
+            if (_controller != null)
+                _controller.SaveState();
         }
 
         private void loadGame_Click(object sender, EventArgs e)
@@ -206,8 +203,6 @@ namespace MineFlags
                     modifiedMine.player = mine.opened_by;
                 }
             }
-
-            _saveState();
         }
 
         private void _handleTurn(Player player)
@@ -240,11 +235,6 @@ namespace MineFlags
             }
         }
 
-        private void _saveState()
-        {
-            Console.WriteLine("--> About to save the state");
-            StateHandler.exportToStorage(_controller, FILENAME);
-        }
         private void _handleGameCompleted(Player player)
         {
             MessageBox.Show(this, "Player " + ((player == Player.ONE) ? "1" : "2") + " won!");
