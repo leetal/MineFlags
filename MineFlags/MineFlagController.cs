@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -45,7 +46,15 @@ namespace MineFlags
         public MineFlagController() { }
         public MineFlagController(int rows, int columns, int mines, bool ai_player = true)
         {
-            NewGame(rows, columns, mines, ai_player);
+            if (File.Exists(FILENAME)) {
+                ContinueGame();
+                Console.WriteLine("_remaining_mines => " + _remaining_mines);
+            } else {
+                NewGame(rows, columns, mines, ai_player);
+            }
+
+            // Announce the turn directly
+            announceTurn(_current_player_turn);
         }
 
         ~MineFlagController() 
@@ -72,9 +81,6 @@ namespace MineFlags
             if (ai_player) {
                 _ai = new AIPlayer(this, rows, columns);
             }
-
-            // Announce the turn directly
-            announceTurn(_current_player_turn);
         }
 
         public void Dispose()
@@ -89,18 +95,15 @@ namespace MineFlags
         }
 
         // State handling
-        public void SaveState()
-        {
-            try
-            {
+        public void SaveState() {
+            try {
                 _saving = true;
-                List<Mine> mines = (from mine in _minefield where mine.GetType() == typeof(Mine) select (Mine)mine).ToList();
+                Mine[] mines = (from mine in _minefield where mine.GetType() == typeof(Mine) select (Mine)mine).ToArray();
                 State saveGame = new State(mines, _rows, _columns, _mines, _remaining_mines, _scores, _current_player_turn, _ai);
                 StateHandler.exportToStorage(saveGame, FILENAME);
+                Console.WriteLine("Saving yo!");
                 _saving = false;
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Console.WriteLine(e.ToString());
             }
         }
@@ -108,13 +111,30 @@ namespace MineFlags
 
         public void ContinueGame()
         {
-            try
-            {
+            try {
+                _saving = true;
+
                 // Get the state from statehandler
                 State state = StateHandler.importFromStorage(FILENAME);
-            }
-            catch (Exception e)
-            {
+                _mines = state.mines;
+                _rows = state.rows;
+                _columns = state.columns;
+                _minefield = state.minefield;
+                _scores = state.scores;
+                _current_player_turn = state.current_player_turn;
+                _remaining_mines = state.remaining_mines;
+                _ai = state.ai;
+
+                // Notify all listeners about how the minefield looks like
+                foreach (Mine mine in _minefield) {
+                    if (mine._opened) {
+                        onMineOpened(mine);
+                    }
+                }
+                
+                Console.WriteLine(state.remaining_mines);
+                _saving = false;
+            } catch (Exception e) {
                 MessageBox.Show("What" + e);
             }
         }
@@ -159,6 +179,7 @@ namespace MineFlags
 
             // Notify everyone about the turn
             announceTurn(_current_player_turn);
+            SaveState();
         }
 
         private void _buildMinefield()

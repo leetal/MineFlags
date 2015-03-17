@@ -24,6 +24,7 @@ namespace MineFlags
             _opened = false;
             _neighbours = 0;
             _mine = false;
+            _opened_by = Player.ONE;
         }
 
         public int row

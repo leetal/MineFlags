@@ -10,7 +10,7 @@ namespace MineFlags
     {
         public State() { }
 
-        public State(List<Mine> minefield, int rows, int columns, int mines, int remaining_mines, int[] scores, Player current_player_turn, AIPlayer ai)
+        public State(Mine[] minefield, int rows, int columns, int mines, int remaining_mines, int[] scores, Player current_player_turn, AIPlayer ai)
         {
             this.minefield = minefield;
             this.rows = rows;
@@ -22,7 +22,7 @@ namespace MineFlags
             this.ai = ai;
         }
 
-        public List<Mine> minefield { get; set; }
+        public Mine[] minefield { get; set; }
         public AIPlayer ai { get; set; }
         public int rows { get; set; }
         public int columns { get; set; }

@@ -19,7 +19,7 @@ namespace MineFlags
         public const int BUTTONSIZE = 32;
         public static int ROWS = 16;
         public static int COLUMNS = 16;
-        public static int MINES = 1;
+        public static int MINES = 50;
         private MineFlagController _controller;
         private MineButton[] _mineButtons;
         private Panel _gameContainer;
