@@ -70,9 +70,12 @@
     <Compile Include="PlayerType\AIPlayer.cs" />
     <Compile Include="PlayerType\IPlayer.cs" />
     <Compile Include="PlayerType\RegularPlayer.cs" />
-    <Compile Include="Logic\State.cs" />
+    <Compile Include="GenericTypes\State.cs" />
     <Compile Include="RulesEngine\GameRules.cs" />
     <Compile Include="RulesEngine\IRules.cs" />
+    <Compile Include="GenericTypes\AbstractState.cs" />
+    <Compile Include="Storage\IStorageEntity.cs" />
+    <Compile Include="Storage\IWatcher.cs" />
     <Compile Include="ViewModels\MineButton.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -86,8 +89,8 @@
     <Compile Include="Logic\MineFlagController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Logic\StateHandler.cs" />
-    <Compile Include="Logic\Watcher.cs" />
+    <Compile Include="Storage\StateHandler.cs" />
+    <Compile Include="Storage\Watcher.cs" />
     <EmbeddedResource Include="ViewModels\GameView.resx">
       <DependentUpon>GameView.cs</DependentUpon>
     </EmbeddedResource>

@@ -6,24 +6,24 @@ using System.Windows.Forms;
 using MineFlags.PlayerType;
 using MineFlags.GenericTypes;
 using MineFlags.RulesEngine;
+using MineFlags.Storage;
 
 namespace MineFlags.Logic
 {
     public class MineFlagController : BaseController
     {
-        private const String FILENAME = "data.xml";
+        private const string FILENAME = "data.xml";
         private Mine[] Minefield;
         private int Rows;
         private int Columns;
         private int RemainingMines;
         private int Mines;
-        private bool Saving = false;
         private Dictionary<PlayerNum, IPlayer> Players = new Dictionary<PlayerNum, IPlayer>();
         private PlayerNum CurrentPlayer;
         private IRules RulesEngine;
 
         // File watcher
-        public Watcher FileWatcher { get; set; }
+        private IWatcher FileWatcher { get; set; }
 
         // Constructor
         public MineFlagController()
@@ -41,7 +41,8 @@ namespace MineFlags.Logic
                 // Announce the scores for each player
                 foreach (KeyValuePair<PlayerNum, IPlayer> player in Players)
                 {
-                    OnScoreChanged(player.Value, player.Value.GetPlayerScore());
+                    IPlayer playerTemp = player.Value;
+                    OnScoreChanged(ref playerTemp, player.Value.GetPlayerScore());
                 }
 
                 // Announce the current player's turn
@@ -78,8 +79,9 @@ namespace MineFlags.Logic
                 FileWatcher.Run();
             }
             
-            // Add our PrintMinefield as an EventListener
-            ResetMinefield += PrintMinefield;
+            // Add controller EventListeners
+            ResetMinefieldEvent += PrintMinefield;
+            OpenMineEvent += OpenMine;
 
             // Build the minefield
             BuildMinefield();
@@ -87,7 +89,7 @@ namespace MineFlags.Logic
             // Should we instantiate an AI IPlayer? 
             if (addAiPlayer)
             {
-                Players.Add(PlayerNum.TWO, new AIPlayer(this, rows, columns, 0, PlayerNum.TWO));
+                Players.Add(PlayerNum.TWO, new AIPlayer(rows, columns, 0, PlayerNum.TWO));
             }
             else
             {
@@ -113,6 +115,13 @@ namespace MineFlags.Logic
                 }
                 Players.Clear();
             }
+
+            // Delete the storage file after each run
+            //StateHandler.DeleteStorageIfExists(FILENAME);
+
+            // Remove all event handlers
+            ResetMinefieldEvent -= PrintMinefield;
+            OpenMineEvent -= OpenMine;
         }
 
         // This is not optimal, but we only support two users ATM
@@ -130,16 +139,17 @@ namespace MineFlags.Logic
 
         /**
          * Opens a mine on the game field
-         * 
-         * Returns true upon successful open. Otherwise false
          */
-        public override bool OpenMine(int index)
+        private void OpenMine(int index, PlayerNum playerNumber)
         {
             Mine mine = Minefield[index];
 
             // Do nothing if the mine is already opened
             if (mine.IsOpened())
-                return false;
+            {
+                OnMineOpened(playerNumber, mine, false);
+                return;
+            }
 
             IPlayer PlayerTemp = Players[CurrentPlayer];
 
@@ -152,15 +162,15 @@ namespace MineFlags.Logic
             }
 
             /* Notify everyone about the opened mine */
-            OnMineOpened(mine);
+            OnMineOpened(playerNumber, mine, true);
 
             // The game is finished if there are no mines left, or if any player has a greter score than half of the available mines
             foreach (KeyValuePair<PlayerNum, IPlayer> player in Players)
             {
                 if (RemainingMines == 0 || player.Value.GetPlayerScore() > Mines / 2)
                 {
-                    OnGameCompleted(PlayerTemp);
-                    return true;
+                    OnGameCompleted(ref PlayerTemp);
+                    return;
                 }
             }
      
@@ -169,8 +179,6 @@ namespace MineFlags.Logic
 
             // Notify everyone about the turn
             OnAnnounceTurn(CurrentPlayer);
-
-            return true;
         }
 
         // This method will open the neighbouring mines to the selected mine
@@ -181,18 +189,19 @@ namespace MineFlags.Logic
             if (!mine.IsMine() && mine.GetNeighbours() == 0)
             {
                 List<Mine> mines = GetNeighbouringMines(index, true);
-                foreach (Mine m in mines)
+                for (int i = 0; i < mines.Count; i++)
                 {
-                    if (!m.IsOpened() && !m.IsMine())
+                    Mine tempMine = mines[i];
+                    if (!tempMine.IsOpened() && !tempMine.IsMine())
                     {
                         // Open the mine
-                        m.Open(p);
+                        tempMine.Open(p.GetPlayerNumber());
 
                         // Invoke the delegate call
-                        OnMineOpened(m);
+                        OnMineOpened(p.GetPlayerNumber(), tempMine, true);
 
                         // Recursively open all neighbours
-                        OpenNeighbouringMines(m.index, p);
+                        OpenNeighbouringMines(tempMine.index, p);
                     }
                 }
             }
@@ -202,10 +211,9 @@ namespace MineFlags.Logic
         {
             try
             {
-                Saving = true;
-
                 // Get the state from state-handler class
-                State state = StateHandler.importFromStorage(FILENAME);
+                State state = StateHandler.ImportFromStorage(FILENAME);
+
                 // Set all variables to their correct values
                 Mines = state.Mines;
                 Rows = state.Rows;
@@ -216,17 +224,17 @@ namespace MineFlags.Logic
                 Players = state.Players;
 
                 // Notify all listeners about how the minefield looks like
-                foreach (Mine mine in Minefield)
+                for (int i = 0; i < Minefield.Length; i++)
                 {
-                    if (mine.Opened)
+                    Mine tempMine = Minefield[i];
+                    if (tempMine.Opened)
                     {
-                        OnMineOpened(mine);
+                        // It is not a player that opens this mine, but the game controller itself
+                        OnMineOpened(PlayerNum.NONE, tempMine, true);
                     }
                 }
 
                 Console.WriteLine("There are {state.RemainingMines} mines left to open");
-
-                Saving = false;
             }
             catch (Exception e)
             {
@@ -237,9 +245,10 @@ namespace MineFlags.Logic
         // State handling
         private void SaveState()
         {
+            // We need to pause the file watcher since this change otherwise will trigger an event
+            FileWatcher.Pause();
             try
             {
-                Saving = true;
                 Console.WriteLine("Saving state...");
 
                 // Use LINQ to dave the state og the mines
@@ -249,14 +258,13 @@ namespace MineFlags.Logic
                 State saveGame = new State(mines, Rows, Columns, Mines, RemainingMines, CurrentPlayer, Players);
 
                 // Save the state to external storage
-                StateHandler.exportToStorage(saveGame, FILENAME);
-
-                Saving = false;
+                StateHandler.ExportToStorage(saveGame, FILENAME);
             }
             catch (Exception e)
             {
-                //MessageBox.Show("Error: " + e.Message);
+                MessageBox.Show("Error: " + e.Message);
             }
+            FileWatcher.Resume();
         }
 
         private void BuildMinefield()
@@ -274,7 +282,7 @@ namespace MineFlags.Logic
                 int index = RandomGenerator.Next(0, Minefield.Length - 1);
                 Mine Mine = Minefield[index];
 
-                // If the mine already is a mine, try again
+                // If the mine already is a true mine, try again
                 if (Mine.IsMine())
                     continue;
 

@@ -1,4 +1,5 @@
 ﻿using MineFlags.GenericTypes;
+using MineFlags.Storage;
 
 namespace MineFlags.PlayerType
 {
@@ -10,7 +11,7 @@ namespace MineFlags.PlayerType
         TWO = 2
     };
 
-    public interface IPlayer
+    public interface IPlayer : IStorageEntity
     {
         int GetPlayerScore();
         void IncrementPlayerScore();

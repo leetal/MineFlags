@@ -6,8 +6,7 @@ namespace MineFlags
     class MineButton : Button
     {
         private int AdjacentNeighbours;
-        private IPlayer Player;
-
+        private PlayerNum IntPlayerNumber;
         public int adjacentNeighbours
         {
             get { return AdjacentNeighbours; }
@@ -21,13 +20,13 @@ namespace MineFlags
         }
         
         // The player sets the taken color of the mine(button)
-        public IPlayer player
+        public PlayerNum PlayerNumber
         {
-            get { return Player; }
-            set { 
-                Player = value;
+            get { return IntPlayerNumber; }
+            set {
+                IntPlayerNumber = value;
                 // Not optimal, but we only support two players ATM
-                if (Player.GetPlayerNumber() == PlayerNum.ONE) {
+                if (IntPlayerNumber == PlayerNum.ONE) {
                     BackColor = System.Drawing.Color.FromArgb(255, 231, 76, 60); // One (ALZARIN)
                 } else {
                     BackColor = System.Drawing.Color.FromArgb(255, 52, 73, 94); // Two (wet asphalt)

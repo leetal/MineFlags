@@ -23,6 +23,7 @@ namespace MineFlags
         private Label Player1Points;
         private Label Player2Points;
         private Label PlayerTurn;
+        private PlayerNum CurrentPlayerNumber;
 
         public MineField()
         {
@@ -37,10 +38,10 @@ namespace MineFlags
         private void Form1_Load(object sender, EventArgs e)
         {
             // Add event handlers
-            BaseController.MineOpened += HandleMineAction;
-            BaseController.AnnounceTurn += HandleTurn;
-            BaseController.ScoreChanged += HandleScoreChanged;
-            BaseController.GameCompleted += HandleGameCompleted;
+            BaseController.MineOpenedEvent += HandleMineAction;
+            BaseController.AnnounceTurnEvent += HandleTurn;
+            BaseController.ScoreChangedEvent += HandleScoreChanged;
+            BaseController.GameCompletedEvent += HandleGameCompleted;
 
             // Static size on the game
             ClientSize = new Size((COLUMNS * BUTTONSIZE + PADDING * 2), (ROWS * BUTTONSIZE + PADDING * 2) + HEADERHEIGHT);
@@ -190,11 +191,11 @@ namespace MineFlags
             MineButton caller = (MineButton)sender;
             int clickedIndex = (int)caller.Tag;
 
-            // Handle mine open event
-            Controller.OpenMine(clickedIndex);
+            // Signal to the controller to open a mine
+            BaseController.OnOpenMine(clickedIndex, CurrentPlayerNumber);
         }
 
-        private void HandleMineAction(Mine mine)
+        private void HandleMineAction(PlayerNum playerNumber, Mine mine, bool success)
         {
             // Catch onMineOpened event
             // Update view accordingly
@@ -206,18 +207,20 @@ namespace MineFlags
 
                 if (mine.IsMine())
                 {
-                    modifiedMine.player = mine.OpenedBy;
+                    modifiedMine.PlayerNumber = mine.OpenedBy;
                 }
             }
         }
 
         private void HandleTurn(PlayerNum playerNumber)
         {
+            CurrentPlayerNumber = playerNumber;
+
             if (PlayerTurn != null)
                 PlayerTurn.Text = "Player " + ((playerNumber == PlayerNum.ONE) ? "one's" : "two's") + " turn";
         }
 
-        private void HandleScoreChanged(IPlayer player, int score)
+        private void HandleScoreChanged(ref IPlayer player, int score)
         {
             Console.WriteLine("Player {0} has a score of {1}", player.ToString(), score.ToString());
             switch (player.GetPlayerNumber())
@@ -241,7 +244,7 @@ namespace MineFlags
             }
         }
 
-        private void HandleGameCompleted(IPlayer player)
+        private void HandleGameCompleted(ref IPlayer player)
         {
             MessageBox.Show(this, "Player " + player.GetPlayerNumber().ToString() + " won!");
         }

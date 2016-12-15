@@ -1,17 +1,18 @@
 ﻿using System;
+using System.Xml.Linq;
 using MineFlags.PlayerType;
+using MineFlags.Storage;
 
 namespace MineFlags.GenericTypes
 {
-    [Serializable]
-    public class Mine
+    public class Mine : IStorageEntity
     {
         public bool Opened { get; set; }
         public int Neighbours { get; set; }
         public bool IsRealMine { get; set; }
         public int Column { get; set; }
         public int Row { get; set; }
-        public IPlayer OpenedBy { get; set; }
+        public PlayerNum OpenedBy { get; set; }
 
         public Mine() { }
 
@@ -22,7 +23,7 @@ namespace MineFlags.GenericTypes
             Opened = false;
             Neighbours = 0;
             IsRealMine = false;
-            OpenedBy = null;
+            OpenedBy = PlayerNum.NONE;
         }
 
         public int row
@@ -30,7 +31,7 @@ namespace MineFlags.GenericTypes
             get { return Row; }
         }
 
-        public IPlayer opened_by
+        public PlayerNum opened_by
         {
             get { return OpenedBy; }
         }
@@ -68,7 +69,7 @@ namespace MineFlags.GenericTypes
             return Neighbours;
         }
 
-        public void Open(IPlayer p)
+        public void Open(PlayerNum p)
         {
             Opened = true;
             OpenedBy = p;
@@ -96,6 +97,28 @@ namespace MineFlags.GenericTypes
                 return "O";
             else
                 return Neighbours > 0 ? Neighbours.ToString() : " ";
+        }
+
+        public XElement ObjectToX()
+        {
+            return new XElement("mine",
+                new XElement("opened", Opened),
+                new XElement("neighbours", Neighbours),
+                new XElement("isrealmine", IsRealMine),
+                new XElement("column", Column),
+                new XElement("row", Row),
+                new XElement("openedby", (int)OpenedBy)
+            );
+        }
+
+        public void XToObject(XElement elem)
+        {
+            Opened = (bool)elem.Element("opened");
+            Neighbours = (int)elem.Element("neighbours");
+            IsRealMine = (bool)elem.Element("isrealmine");
+            Column = (int)elem.Element("column");
+            Row = (int)elem.Element("row");
+            OpenedBy = (PlayerNum)((int)elem.Element("openedby"));
         }
     }
 }

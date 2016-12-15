@@ -1,16 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Security.Permissions;
+using MineFlags.Logic;
 
-namespace MineFlags.Logic
+namespace MineFlags.Storage
 {
-    public class Watcher
+    public class Watcher : IWatcher
     {
-    	public FileSystemWatcher FileWatcher { get; set; }
+    	private FileSystemWatcher FileWatcher { get; set; }
         private string Filename;
         private IController Controller;
 
-        public Watcher(String path, IController controller) 
+        public Watcher(string path, IController controller) 
         {
             Controller = controller;
             Filename = path;
@@ -26,6 +27,9 @@ namespace MineFlags.Logic
         [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
         public void Run()
         {
+            if (FileWatcher != null)
+                return;
+
             // Create a FileSystemWatcher
             FileWatcher = new FileSystemWatcher();
             FileWatcher.Path = Directory.GetCurrentDirectory();
@@ -46,8 +50,20 @@ namespace MineFlags.Logic
         {
             Console.WriteLine("File: " + args.FullPath + " " + args.ChangeType);
             FileWatcher.EnableRaisingEvents = false;
+
             if(Controller != null)
                 Controller.ResumeGameFromState();
+
+            FileWatcher.EnableRaisingEvents = true;
+        }
+
+        public void Pause()
+        {
+            FileWatcher.EnableRaisingEvents = false;
+        }
+
+        public void Resume()
+        {
             FileWatcher.EnableRaisingEvents = true;
         }
     }

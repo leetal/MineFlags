@@ -1,7 +1,5 @@
-﻿using System;
-using MineFlags.GenericTypes;
+﻿using MineFlags.GenericTypes;
 using MineFlags.Logic;
-using System.Collections.Generic;
 using MineFlags.PlayerType;
 
 namespace MineFlags.RulesEngine
@@ -23,7 +21,7 @@ namespace MineFlags.RulesEngine
         public bool Evaluate(ref Mine mine, ref IPlayer player)
         {
             // Open the mine
-            mine.Open(player);
+            mine.Open(player.GetPlayerNumber());
 
             if (!mine.IsMine() && mine.GetNeighbours() == 0)
             {
@@ -40,7 +38,7 @@ namespace MineFlags.RulesEngine
                 player.IncrementPlayerScore();
 
                 // Notify about any score change
-                BaseController.OnScoreChanged(player, player.GetPlayerScore());
+                BaseController.OnScoreChanged(ref player, player.GetPlayerScore());
                 return true;
             }
             else

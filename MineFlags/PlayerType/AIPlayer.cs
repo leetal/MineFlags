@@ -1,39 +1,47 @@
 ﻿using System;
 using System.Linq;
+using System.Xml.Linq;
 using MineFlags.GenericTypes;
 using MineFlags.Logic;
 
 namespace MineFlags.PlayerType
 {
-    [Serializable]
     public class AIPlayer : AbstractPlayer
     {
-        private IController Controller;
-        public bool[] OpenedMinefield { get; set; }
+        private bool[] OpenedMinefield { get; set; }
 
-        public AIPlayer(IController controller, int rows, int columns, int score, PlayerNum num) : base(score, num)
+        public AIPlayer() : base()
         {
-            /* Keep the reference to the controller */
-            Controller = controller;
 
+        }
+
+        public AIPlayer(int rows, int columns, int score, PlayerNum num) : base(score, num)
+        {
             // The AI must somehow remeber what tile has been opened or not..
             OpenedMinefield = Enumerable.Repeat(false, MineField.ROWS * MineField.COLUMNS).ToArray();
         }
 
-        ~AIPlayer()
-        {
-            Controller = null;
-        }
+        ~AIPlayer() { }
 
-        public override void OnMineOpened(Mine m) {
-            Console.WriteLine("[AIPlayer] onMineOpened");
-            OpenedMinefield[m.index] = true;
+        public override void OnMineOpened(PlayerNum playerNumber, Mine m, bool success) {
+            // IFF the AI tried to open a mine that was already taken, success == false
+            // In such a case, the API must tru again!
+
+            if (success)
+            {
+                OpenedMinefield[m.index] = true;
+            }
+            else if (playerNumber == PlayerNum)
+            {
+                // Try again!
+                HandleTurn(PlayerNum);
+            }
         }
 
         public override void HandleTurn(PlayerNum playerNumber)
         {
-            // Player 1 is always the "human" player if AI is playing the game
-            if (playerNumber == PlayerNum.ONE)
+            // If it is not the AI:s turn, just return...
+            if (playerNumber != PlayerNum)
                 return;
 
             // This AI is really dumb and just randomly selects a mine and hopes for the best
@@ -46,15 +54,16 @@ namespace MineFlags.PlayerType
                 if (OpenedMinefield[index])
                     continue;
 
-                // Call the controller to open the mine
-                if (!Controller.OpenMine(index))
-                {
-                    // If the AI did pick an already taken mine, try again
-                    continue;
-                }
+                // Signal the controller to open the mine
+                BaseController.OnOpenMine(index, PlayerNum);
 
                 break;
             }
+        }
+
+        public override string GetPlayerType()
+        {
+            return "ai";
         }
     }
 }
