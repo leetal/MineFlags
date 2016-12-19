@@ -14,6 +14,7 @@ namespace MineFlags.PlayerType
     public interface IPlayer : IStorageEntity
     {
         int GetPlayerScore();
+        string GetPlayerType();
         void IncrementPlayerScore();
         PlayerNum GetPlayerNumber();
         void Dispose();

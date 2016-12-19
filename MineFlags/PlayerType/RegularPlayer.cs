@@ -7,16 +7,15 @@ namespace MineFlags.PlayerType
     public class RegularPlayer : AbstractPlayer
     {
 
-        public RegularPlayer() : base()
-        {
+        public RegularPlayer() : base() { }
 
-        }
+        public RegularPlayer(int score, PlayerNum num) : base(score, num) { }
 
-        public RegularPlayer(int score, PlayerNum num) : base(score, num) {}
+        protected override void OnNewGame(int rows, int columns, int numberOfPlayers) { }
 
-        public override void HandleTurn(PlayerNum playerNumber) { }
+        protected override void HandleTurn(PlayerNum playerNumber) { }
 
-        public override void OnMineOpened(PlayerNum playerNumber, Mine m, bool success)
+        protected override void OnMineOpened(PlayerNum playerNumber, Mine m, bool success)
         {
             Console.WriteLine("[Player] onMineOpened: ", PlayerNum);
         }

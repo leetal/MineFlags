@@ -32,28 +32,6 @@ namespace MineFlags.Storage
             // NOTE: The format specifies that we shall always have just one state under states.
             XElement stateElem = xdoc.Root.Element("state");
 
-            // Since the format specified only contains one state, this should be fine in all (current) cases
-            /*State state =
-                (
-                    from s in doc.Root.Elements("state")
-                    select new State
-                    {
-                        Rows = (int)s.Element("rows"),
-                        Columns = (int)s.Element("columns"),
-                        RemainingMines = (int)s.Element("remainingmines"),
-                        CurrentPlayer = (PlayerNum)((int)s.Element("currentplayer")),
-                        Players = XToPlayers(s.Document),
-                        Minefield = XToMineField(s.Document, (int)s.Element("rows"), (int)s.Element("columns")),
-                    }
-                ).FirstOrDefault();
-
-            // Set the variables in THIS instance
-            Rows = state.Rows;
-            Columns = state.Columns;
-            RemainingMines = state.RemainingMines;
-            CurrentPlayer = state.CurrentPlayer;
-            */
-
             // The below construct is so that we can switch implementations later on without too much hussle
             return AbstractState.CreateInstance<State>(stateElem);
         }

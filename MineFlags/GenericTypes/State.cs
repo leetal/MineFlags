@@ -58,11 +58,11 @@ namespace MineFlags.GenericTypes
             // Toss some LINQ magic on it!
             IEnumerable<IPlayer> players = elem.Elements().Select(playerElement =>
             {
-                var type = (string)playerElement.Element("type");
+                var Type = (string)playerElement.Element("type");
 
                 // Some magic due to players being referenced as interfaces
                 IPlayer TempIPlayer = null;
-                switch (type)
+                switch (Type)
                 {
                     case "regular":
                         TempIPlayer = (IPlayer)new RegularPlayer();
@@ -123,8 +123,9 @@ namespace MineFlags.GenericTypes
                     new XElement("players", GetAllPlayers()),
                     new XElement("rows", Rows),
                     new XElement("columns", Columns),
+                    new XElement("nomines", Mines),
                     new XElement("remainingmines", RemainingMines),
-                    new XElement("currentplayer", (int)CurrentPlayer)
+                    new XElement("currentplayer", (int)CurrentPlayer)   // Explicit cast from Enum to int
             ));
         }
 
@@ -134,6 +135,7 @@ namespace MineFlags.GenericTypes
             Rows = (int)elem.Element("rows");
             Columns = (int)elem.Element("columns");
             RemainingMines = (int)elem.Element("remainingmines");
+            Mines = (int)elem.Element("nomines");
             CurrentPlayer = (PlayerNum)((int)elem.Element("currentplayer"));
 
             Players = XToPlayers(elem.Element("players"));

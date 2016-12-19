@@ -8,8 +8,9 @@ namespace MineFlags.PlayerType
 {
     public abstract class AbstractPlayer : IPlayer
     {
-        public abstract void HandleTurn(PlayerNum playerNumber);
-        public abstract void OnMineOpened(PlayerNum playerNumber, Mine m, bool success);
+        protected abstract void OnNewGame(int rows, int columns, int numberOfPlayers);
+        protected abstract void HandleTurn(PlayerNum playerNumber);
+        protected abstract void OnMineOpened(PlayerNum playerNumber, Mine m, bool success);
         public abstract string GetPlayerType();
 
         public virtual XElement ObjectToX()
@@ -30,22 +31,25 @@ namespace MineFlags.PlayerType
         public PlayerNum PlayerNum { get; set; }
         public int Score { get; set; }
 
-        public AbstractPlayer() { }
-
-        public AbstractPlayer(int score, PlayerNum playerNum)
+        public AbstractPlayer()
         {
-            PlayerNum = playerNum;
-            Score = score;
-
             // Subscribe to the events
+            BaseController.NewGameEvent += OnNewGame;
             BaseController.ScoreChangedEvent += OnScoreChanged;
             BaseController.MineOpenedEvent += OnMineOpened;
             BaseController.AnnounceTurnEvent += HandleTurn;
         }
 
+        public AbstractPlayer(int score, PlayerNum playerNum) : this()
+        {
+            PlayerNum = playerNum;
+            Score = score;
+        }
+
         public void Dispose()
         {
             // Unsubscribe from the events
+            BaseController.NewGameEvent -= OnNewGame;
             BaseController.ScoreChangedEvent -= OnScoreChanged;
             BaseController.MineOpenedEvent -= OnMineOpened;
             BaseController.AnnounceTurnEvent -= HandleTurn;

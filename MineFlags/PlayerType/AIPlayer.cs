@@ -10,23 +10,21 @@ namespace MineFlags.PlayerType
     {
         private bool[] OpenedMinefield { get; set; }
 
-        public AIPlayer() : base()
-        {
+        public AIPlayer() : base() { }
 
-        }
-
-        public AIPlayer(int rows, int columns, int score, PlayerNum num) : base(score, num)
-        {
-            // The AI must somehow remeber what tile has been opened or not..
-            OpenedMinefield = Enumerable.Repeat(false, MineField.ROWS * MineField.COLUMNS).ToArray();
-        }
+        public AIPlayer(int score, PlayerNum num) : base(score, num) { }
 
         ~AIPlayer() { }
 
-        public override void OnMineOpened(PlayerNum playerNumber, Mine m, bool success) {
-            // IFF the AI tried to open a mine that was already taken, success == false
-            // In such a case, the API must tru again!
+        protected override void OnNewGame(int rows, int columns, int numberOfPlayers)
+        {
+            // The AI must somehow remeber what tile has been opened or not..
+            OpenedMinefield = Enumerable.Repeat(false, rows * columns).ToArray();
+        }
 
+        protected override void OnMineOpened(PlayerNum playerNumber, Mine m, bool success) {
+            // IFF the AI tried to open a mine that was already taken, success == false
+            // In such a case, the AI must try again!
             if (success)
             {
                 OpenedMinefield[m.index] = true;
@@ -38,7 +36,7 @@ namespace MineFlags.PlayerType
             }
         }
 
-        public override void HandleTurn(PlayerNum playerNumber)
+        protected override void HandleTurn(PlayerNum playerNumber)
         {
             // If it is not the AI:s turn, just return...
             if (playerNumber != PlayerNum)
@@ -55,7 +53,7 @@ namespace MineFlags.PlayerType
                     continue;
 
                 // Signal the controller to open the mine
-                BaseController.OnOpenMine(index, PlayerNum);
+                BaseController.OnOpenMine(index, PlayerNum, false);
 
                 break;
             }

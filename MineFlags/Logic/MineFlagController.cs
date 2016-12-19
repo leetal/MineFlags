@@ -21,6 +21,7 @@ namespace MineFlags.Logic
         private Dictionary<PlayerNum, IPlayer> Players = new Dictionary<PlayerNum, IPlayer>();
         private PlayerNum CurrentPlayer;
         private IRules RulesEngine;
+        private bool GameLocked = false;
 
         // File watcher
         private IWatcher FileWatcher { get; set; }
@@ -29,25 +30,6 @@ namespace MineFlags.Logic
         public MineFlagController()
         {
             RulesEngine = new GameRules(this);
-
-            // If a game state file exists, use that!
-            if (File.Exists(FILENAME))
-            {
-                // This will load the state into the game logic
-                ResumeGameFromState();
-
-                Console.WriteLine("Remaining mines: {RemainingMines}");
-
-                // Announce the scores for each player
-                foreach (KeyValuePair<PlayerNum, IPlayer> player in Players)
-                {
-                    IPlayer playerTemp = player.Value;
-                    OnScoreChanged(ref playerTemp, player.Value.GetPlayerScore());
-                }
-
-                // Announce the current player's turn
-                OnAnnounceTurn(CurrentPlayer);
-            }
         }
 
         // Destructor
@@ -57,20 +39,15 @@ namespace MineFlags.Logic
             Dispose();
         }
 
-        public override void NewGame(int rows, int columns, int mines, bool addAiPlayer)
+        public override void NewGame(bool reset, int rows, int columns, int mines, bool addAiPlayer)
         {
-            // The first we ALWAYS need to do is to clear any previous values
+            // The first we ALWAYS need to do is to clear any previous local states
             Dispose();
 
-            // Set the current player to the first player
-            CurrentPlayer = PlayerNum.ONE;
-            // Add at least one player
-            Players.Add(CurrentPlayer, new RegularPlayer(0, CurrentPlayer));
-            
-            Rows = rows;
-            Columns = columns;
-            Mines = mines;
-            RemainingMines = mines;
+            if (reset)
+            {
+                StateHandler.DeleteStorageIfExists(FILENAME);
+            }
 
             // Create a watcher for keeping track on game updates from the state file
             if (FileWatcher == null)
@@ -78,24 +55,56 @@ namespace MineFlags.Logic
                 FileWatcher = new Watcher(FILENAME, this);
                 FileWatcher.Run();
             }
-            
+
             // Add controller EventListeners
             ResetMinefieldEvent += PrintMinefield;
             OpenMineEvent += OpenMine;
 
-            // Build the minefield
-            BuildMinefield();
-
-            // Should we instantiate an AI IPlayer? 
-            if (addAiPlayer)
+            // If a game state file exists, use that!
+            if (File.Exists(FILENAME))
             {
-                Players.Add(PlayerNum.TWO, new AIPlayer(rows, columns, 0, PlayerNum.TWO));
+                // This will load the state into the game logic
+                FetchStoredState();
             }
             else
             {
-                // Add a second regular player
-                Players.Add(PlayerNum.TWO, new RegularPlayer(0, PlayerNum.TWO));
+                // Set the current player to the first player
+                CurrentPlayer = PlayerNum.ONE;
+                // Add at least one player
+                Players.Add(CurrentPlayer, new RegularPlayer(0, CurrentPlayer));
+
+                Rows = rows;
+                Columns = columns;
+                Mines = mines;
+                RemainingMines = mines;
+
+                // Build the minefield
+                BuildMinefield();
+
+                // Should we instantiate an AI IPlayer? 
+                if (addAiPlayer)
+                {
+                    Players.Add(PlayerNum.TWO, new AIPlayer(0, PlayerNum.TWO));
+                }
+                else
+                {
+                    // Add a second regular player
+                    Players.Add(PlayerNum.TWO, new RegularPlayer(0, PlayerNum.TWO));
+                }
             }
+
+            // Notify that we have started a new game
+            // NOTE: The "2" players is hardcoded for now due to future addon
+            OnNewGame(Rows, Columns, 2);
+
+            if (File.Exists(FILENAME))
+            {
+                // This will restore the state again
+                ResumeGameFromState();
+            }
+            
+            // Announce the current player's turn
+            OnAnnounceTurn(CurrentPlayer);
         }
 
         public override void Dispose()
@@ -122,6 +131,8 @@ namespace MineFlags.Logic
             // Remove all event handlers
             ResetMinefieldEvent -= PrintMinefield;
             OpenMineEvent -= OpenMine;
+
+            GameLocked = false;
         }
 
         // This is not optimal, but we only support two users ATM
@@ -140,8 +151,20 @@ namespace MineFlags.Logic
         /**
          * Opens a mine on the game field
          */
-        private void OpenMine(int index, PlayerNum playerNumber)
+        private void OpenMine(int index, PlayerNum playerNumber, bool manualInput)
         {
+            // Prevent the user from opening an AI´s tiles
+            if (CurrentPlayerIsAI() && manualInput)
+            {
+                Console.WriteLine(string.Format("[Player {0}] Cheating is baaaad!", playerNumber));
+                return;
+            }
+            else if (GameLocked)
+            {
+                // Prevent any actions if the state is "locked"!
+                return;
+            }
+
             Mine mine = Minefield[index];
 
             // Do nothing if the mine is already opened
@@ -169,7 +192,12 @@ namespace MineFlags.Logic
             {
                 if (RemainingMines == 0 || player.Value.GetPlayerScore() > Mines / 2)
                 {
+                    // Lock the controller
+                    GameLocked = true;
+                    // Signal that the game is over
                     OnGameCompleted(ref PlayerTemp);
+                    // Delete the stored state file as well!
+                    StateHandler.DeleteStorageIfExists(FILENAME);
                     return;
                 }
             }
@@ -207,7 +235,7 @@ namespace MineFlags.Logic
             }
         }
 
-        public override void ResumeGameFromState()
+        public override void FetchStoredState()
         {
             try
             {
@@ -223,6 +251,19 @@ namespace MineFlags.Logic
                 RemainingMines = state.RemainingMines;
                 Players = state.Players;
 
+                Console.WriteLine(string.Format("Mines in total: {0}", Mines));
+                Console.WriteLine(string.Format("Remaining mines: {0}", RemainingMines));
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Fatal: " + e.Message);
+            }
+        }
+
+        public override void ResumeGameFromState()
+        {
+            try
+            {
                 // Notify all listeners about how the minefield looks like
                 for (int i = 0; i < Minefield.Length; i++)
                 {
@@ -234,12 +275,22 @@ namespace MineFlags.Logic
                     }
                 }
 
-                Console.WriteLine("There are {state.RemainingMines} mines left to open");
+                // Announce the scores for each player
+                foreach (KeyValuePair<PlayerNum, IPlayer> player in Players)
+                {
+                    IPlayer playerTemp = player.Value;
+                    OnScoreChanged(ref playerTemp, player.Value.GetPlayerScore());
+                }
             }
             catch (Exception e)
             {
-                MessageBox.Show("Error: " + e.Message);
+                MessageBox.Show("Fatal: " + e.Message);
             }
+        }
+
+        private bool CurrentPlayerIsAI()
+        {
+            return Players[CurrentPlayer].GetPlayerType().Equals("ai");
         }
 
         // State handling
@@ -354,9 +405,12 @@ namespace MineFlags.Logic
         {
             for (int index = 0; index < Minefield.Length; ++index)
             {
+                // Newline
                 if ((index % Columns) == 0)
+                {
                     Console.Write("\n");
-
+                }
+                    
                 Console.Write(Minefield[index].ToString());
             }
         }

@@ -64,7 +64,7 @@ namespace MineFlags
             {
                 Controller = new MineFlagController(); // Instantiate our MineFlagController (the main game logic)
                 // Instantiate a new game WITHOUT AI from the start
-                Controller.NewGame(ROWS, COLUMNS, MINES, false);
+                Controller.NewGame(false, ROWS, COLUMNS, MINES, false);
             }
         }
 
@@ -78,7 +78,7 @@ namespace MineFlags
 
             // New game!
             if (Controller != null)
-                Controller.NewGame(ROWS, COLUMNS, MINES, ai);
+                Controller.NewGame(true, ROWS, COLUMNS, MINES, ai);
 
             StartGame();
         }
@@ -192,7 +192,7 @@ namespace MineFlags
             int clickedIndex = (int)caller.Tag;
 
             // Signal to the controller to open a mine
-            BaseController.OnOpenMine(clickedIndex, CurrentPlayerNumber);
+            BaseController.OnOpenMine(clickedIndex, CurrentPlayerNumber, true);
         }
 
         private void HandleMineAction(PlayerNum playerNumber, Mine mine, bool success)

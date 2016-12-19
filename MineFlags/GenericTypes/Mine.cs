@@ -92,11 +92,11 @@ namespace MineFlags.GenericTypes
         public override string ToString()
         {
             if (IsRealMine)
-                return "X";
+                return "X ";
             else if (Opened)
-                return "O";
+                return "O ";
             else
-                return Neighbours > 0 ? Neighbours.ToString() : " ";
+                return Neighbours > 0 ? Neighbours.ToString() + " " : "  ";
         }
 
         public XElement ObjectToX()
