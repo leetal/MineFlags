@@ -1,6 +1,4 @@
-﻿using System;
-using System.Xml.Linq;
-using MineFlags.GenericTypes;
+﻿using MineFlags.GenericTypes;
 
 namespace MineFlags.PlayerType
 {
@@ -15,10 +13,7 @@ namespace MineFlags.PlayerType
 
         protected override void HandleTurn(PlayerNum playerNumber) { }
 
-        protected override void OnMineOpened(PlayerNum playerNumber, Mine m, bool success)
-        {
-            Console.WriteLine("[Player] onMineOpened: ", PlayerNum);
-        }
+        protected override void OnMineOpened(PlayerNum playerNumber, Mine m, bool success) { }
 
         public override string GetPlayerType()
         {

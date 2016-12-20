@@ -1,8 +1,6 @@
-﻿using System;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using MineFlags.GenericTypes;
 using MineFlags.Logic;
-using MineFlags.Storage;
 
 namespace MineFlags.PlayerType
 {
@@ -71,7 +69,7 @@ namespace MineFlags.PlayerType
             Score += 1;
         }
 
-        private void OnScoreChanged(ref IPlayer player, int score)
+        private void OnScoreChanged(IPlayer player, int score)
         {
             if (PlayerNum == player.GetPlayerNumber())
             {

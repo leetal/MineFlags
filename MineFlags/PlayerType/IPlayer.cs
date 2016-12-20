@@ -1,5 +1,4 @@
-﻿using MineFlags.GenericTypes;
-using MineFlags.Storage;
+﻿using MineFlags.Storage;
 
 namespace MineFlags.PlayerType
 {

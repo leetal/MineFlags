@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace MineFlags
@@ -12,6 +13,9 @@ namespace MineFlags
 
         static void Main()
         {
+            Thread th = Thread.CurrentThread;
+            th.Name = "GUI thread";
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MineField());

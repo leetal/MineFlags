@@ -1,4 +1,5 @@
-﻿using MineFlags.GenericTypes;
+﻿using System;
+using MineFlags.GenericTypes;
 using MineFlags.PlayerType;
 
 namespace MineFlags.Logic
@@ -7,8 +8,7 @@ namespace MineFlags.Logic
     {
         public abstract void NewGame(bool reset, int rows, int columns, int mines, bool addAiPlayer);
         public abstract void Dispose();
-        public abstract void ResumeGameFromState();
-        public abstract void FetchStoredState();
+        public abstract void GameFromState();
         public abstract void OpenNeighbouringMines(int index, IPlayer p);
         public abstract void ChangeTurn();
 
@@ -17,15 +17,17 @@ namespace MineFlags.Logic
         public delegate void NewGameType(int rows, int columns, int numberOfPlayers);
         public delegate void MineHandlerType(PlayerNum playerNumber, Mine m, bool success);
         public delegate void MinefieldHandlerType();
+        public delegate void ResetMinefieldHandlerType(bool ai);
         public delegate void TurnHandlerType(PlayerNum playerNumber);
-        public delegate void PlayerScoreChangedType(ref IPlayer player, int score);
-        public delegate void GameCompletedType(ref IPlayer player);
+        public delegate void PlayerScoreChangedType(IPlayer player, int score);
+        public delegate void GameCompletedType(IPlayer player);
         public delegate void MineOpenType(int index, PlayerNum playerNumber, bool manualInput);
 
         // Events
         public static event NewGameType NewGameEvent;
         public static event MineHandlerType MineOpenedEvent;
-        public static event MinefieldHandlerType ResetMinefieldEvent;
+        public static event MinefieldHandlerType MinefieldBuiltEvent;
+        public static event ResetMinefieldHandlerType ResetMinefieldEvent;
         public static event TurnHandlerType AnnounceTurnEvent;
         public static event PlayerScoreChangedType ScoreChangedEvent;
         public static event GameCompletedType GameCompletedEvent;
@@ -39,9 +41,13 @@ namespace MineFlags.Logic
         {
             MineOpenedEvent?.Invoke(playerNumber, m, success);
         }
-        public static void OnResetMinefield()
+        public static void OnMinefieldBuilt()
         {
-            ResetMinefieldEvent?.Invoke();
+            MinefieldBuiltEvent?.Invoke();
+        }
+        public static void OnResetMinefield(bool ai)
+        {
+            ResetMinefieldEvent?.Invoke(ai);
         }
         public static void OnAnnounceTurn(PlayerNum playerNumber)
         {
@@ -49,11 +55,11 @@ namespace MineFlags.Logic
         }
         public static void OnScoreChanged(ref IPlayer player, int score)
         {
-            ScoreChangedEvent?.Invoke(ref player, score);
+            ScoreChangedEvent?.Invoke(player, score);
         }
-        public static void OnGameCompleted(ref IPlayer player)
+        public static void OnGameCompleted(IPlayer player)
         {
-            GameCompletedEvent?.Invoke(ref player);
+            GameCompletedEvent?.Invoke(player);
         }
         public static void OnOpenMine(int index, PlayerNum playerNumber, bool manualInput)
         {

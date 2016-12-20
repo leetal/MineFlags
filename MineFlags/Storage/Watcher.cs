@@ -52,9 +52,11 @@ namespace MineFlags.Storage
             FileWatcher.EnableRaisingEvents = false;
 
             if(Controller != null)
-                Controller.ResumeGameFromState();
+                Controller.GameFromState();
 
-            FileWatcher.EnableRaisingEvents = true;
+            // This case can occur if a race condition causes the filewatcher do dealloc before the game has reset for example
+            if (FileWatcher != null)
+                FileWatcher.EnableRaisingEvents = true;
         }
 
         public void Pause()

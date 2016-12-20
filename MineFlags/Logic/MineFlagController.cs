@@ -7,6 +7,7 @@ using MineFlags.PlayerType;
 using MineFlags.GenericTypes;
 using MineFlags.RulesEngine;
 using MineFlags.Storage;
+using System.ComponentModel;
 
 namespace MineFlags.Logic
 {
@@ -57,7 +58,7 @@ namespace MineFlags.Logic
             }
 
             // Add controller EventListeners
-            ResetMinefieldEvent += PrintMinefield;
+            MinefieldBuiltEvent += PrintMinefield;
             OpenMineEvent += OpenMine;
 
             // If a game state file exists, use that!
@@ -102,7 +103,7 @@ namespace MineFlags.Logic
                 // This will restore the state again
                 ResumeGameFromState();
             }
-            
+
             // Announce the current player's turn
             OnAnnounceTurn(CurrentPlayer);
         }
@@ -129,7 +130,7 @@ namespace MineFlags.Logic
             //StateHandler.DeleteStorageIfExists(FILENAME);
 
             // Remove all event handlers
-            ResetMinefieldEvent -= PrintMinefield;
+            MinefieldBuiltEvent -= PrintMinefield;
             OpenMineEvent -= OpenMine;
 
             GameLocked = false;
@@ -195,13 +196,14 @@ namespace MineFlags.Logic
                     // Lock the controller
                     GameLocked = true;
                     // Signal that the game is over
-                    OnGameCompleted(ref PlayerTemp);
+                    OnGameCompleted(PlayerTemp);
                     // Delete the stored state file as well!
                     StateHandler.DeleteStorageIfExists(FILENAME);
                     return;
                 }
             }
-     
+
+            // (A file can only be written by a process at a given time)
             // Save the state
             SaveState();
 
@@ -212,30 +214,63 @@ namespace MineFlags.Logic
         // This method will open the neighbouring mines to the selected mine
         public override void OpenNeighbouringMines(int index, IPlayer p)
         {
-            Mine mine = Minefield[index];
+            BackgroundWorker bw = new BackgroundWorker();
 
-            if (!mine.IsMine() && mine.GetNeighbours() == 0)
+            bw.DoWork += new DoWorkEventHandler(
+            delegate (object o, DoWorkEventArgs args)
             {
-                List<Mine> mines = GetNeighbouringMines(index, true);
-                for (int i = 0; i < mines.Count; i++)
+                Mine mine = Minefield[index];
+
+                if (!mine.IsMine() && mine.GetNeighbours() == 0)
                 {
-                    Mine tempMine = mines[i];
-                    if (!tempMine.IsOpened() && !tempMine.IsMine())
+                    List<Mine> mines = GetNeighbouringMines(index, true);
+                    for (int i = 0; i < mines.Count; i++)
                     {
-                        // Open the mine
-                        tempMine.Open(p.GetPlayerNumber());
+                        Mine tempMine = mines[i];
+                        if (!tempMine.IsOpened() && !tempMine.IsMine())
+                        {
+                            // Open the mine
+                            tempMine.Open(p.GetPlayerNumber());
 
-                        // Invoke the delegate call
-                        OnMineOpened(p.GetPlayerNumber(), tempMine, true);
+                            // Invoke the delegate call
+                            OnMineOpened(p.GetPlayerNumber(), tempMine, true);
 
-                        // Recursively open all neighbours
-                        OpenNeighbouringMines(tempMine.index, p);
+                            // Recursively open all neighbours
+                            OpenNeighbouringMines(tempMine.index, p);
+                        }
                     }
                 }
+            });
+
+            // Kick off the background worker to speed up the load of the view
+            bw.RunWorkerAsync();
+        }
+
+        public override void GameFromState()
+        {
+            GameLocked = true;
+
+            // If a game state file exists, use that!
+            if (File.Exists(FILENAME))
+            {
+                // Signal a reset of the game
+                OnResetMinefield(GameHasAIPlayer());
+
+                // This will load the state into the game logic
+                FetchStoredState();
+
+                // Notify of new game
+                OnNewGame(Rows, Columns, 2);
+
+                // Sleep for 10ms to allow AI to initialize
+                System.Threading.Thread.Sleep(10);
+
+                // This will restore the state again
+                ResumeGameFromState();
             }
         }
 
-        public override void FetchStoredState()
+        public void FetchStoredState()
         {
             try
             {
@@ -256,13 +291,18 @@ namespace MineFlags.Logic
             }
             catch (Exception e)
             {
-                MessageBox.Show("Fatal: " + e.Message);
+                // Will in 99.99% never come here. Only if someone modifies the data in a faulty manner.
+                // Let's assume that to be an edge case...
+                MessageBox.Show("Fatal! Could not retreive data from storage. Case: " + e.Message);
             }
         }
 
-        public override void ResumeGameFromState()
+        public void ResumeGameFromState()
         {
-            try
+            BackgroundWorker bw = new BackgroundWorker();
+
+            bw.DoWork += new DoWorkEventHandler(
+            delegate (object o, DoWorkEventArgs args)
             {
                 // Notify all listeners about how the minefield looks like
                 for (int i = 0; i < Minefield.Length; i++)
@@ -281,16 +321,28 @@ namespace MineFlags.Logic
                     IPlayer playerTemp = player.Value;
                     OnScoreChanged(ref playerTemp, player.Value.GetPlayerScore());
                 }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Fatal: " + e.Message);
-            }
+
+            });
+
+            // Kick off the background worker to speed up the load of the view
+            bw.RunWorkerAsync();
         }
 
         private bool CurrentPlayerIsAI()
         {
             return Players[CurrentPlayer].GetPlayerType().Equals("ai");
+        }
+
+        private bool GameHasAIPlayer()
+        {
+            foreach (KeyValuePair<PlayerNum, IPlayer> player in Players)
+            {
+                if (player.Value.GetPlayerType().Equals("ai"))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // State handling
@@ -300,14 +352,10 @@ namespace MineFlags.Logic
             FileWatcher.Pause();
             try
             {
-                Console.WriteLine("Saving state...");
-
-                // Use LINQ to dave the state og the mines
+                // Use LINQ to save the state of the mines
                 Mine[] mines = (from mine in Minefield where mine.GetType() == typeof(Mine) select (Mine)mine).ToArray();
-
                 // Create a "state" object that we can utilize for serialization and deserialization
                 State saveGame = new State(mines, Rows, Columns, Mines, RemainingMines, CurrentPlayer, Players);
-
                 // Save the state to external storage
                 StateHandler.ExportToStorage(saveGame, FILENAME);
             }
@@ -322,35 +370,46 @@ namespace MineFlags.Logic
         {
             // Create all the mines in the minefield
             Minefield = new Mine[Rows * Columns];
-            for (int index = 0; index < Minefield.Length; ++index)
-                Minefield[index] = new Mine((index / Columns), (index % Columns));
-
-            // Set out some mines
-            Random RandomGenerator = new Random();
-            int AddedMines = 0;
-            while (AddedMines < RemainingMines)
+            BackgroundWorker bw = new BackgroundWorker();
+            bw.DoWork += new DoWorkEventHandler(
+            delegate (object o, DoWorkEventArgs args)
             {
-                int index = RandomGenerator.Next(0, Minefield.Length - 1);
-                Mine Mine = Minefield[index];
+                for (int index = 0; index < Minefield.Length; ++index)
+                    Minefield[index] = new Mine((index / Columns), (index % Columns));
 
-                // If the mine already is a true mine, try again
-                if (Mine.IsMine())
-                    continue;
-
-                Mine.SetAsMine(true);
-
-                /* Tell the neighbours about the newly added mine */
-                List<Mine> mines = GetNeighbouringMines(index, true);
-                mines.ForEach(delegate (Mine m)
+                // Set out some mines
+                Random RandomGenerator = new Random();
+                int AddedMines = 0;
+                while (AddedMines < RemainingMines)
                 {
-                    m.IncreaseNeighbours();
-                });
+                    int index = RandomGenerator.Next(0, Minefield.Length - 1);
+                    Mine Mine = Minefield[index];
 
-                ++AddedMines;
-            }
+                    // If the mine already is a true mine, try again
+                    if (Mine.IsMine())
+                        continue;
 
-            // Invoke the reset call if we have one defined
-            OnResetMinefield();
+                    Mine.SetAsMine(true);
+
+                    /* Tell the neighbours about the newly added mine */
+                    List<Mine> mines = GetNeighbouringMines(index, true);
+                    mines.ForEach(delegate (Mine m)
+                    {
+                        m.IncreaseNeighbours();
+                    });
+
+                    ++AddedMines;
+                }
+            });
+            
+            bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(
+            delegate (object o, RunWorkerCompletedEventArgs args)
+            {
+                // Invoke the reset call if we have one defined
+                OnMinefieldBuilt();
+            });
+
+            bw.RunWorkerAsync();
         }
 
         private List<Mine> GetNeighbouringMines(int index, bool corners)
@@ -410,7 +469,7 @@ namespace MineFlags.Logic
                 {
                     Console.Write("\n");
                 }
-                    
+
                 Console.Write(Minefield[index].ToString());
             }
         }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Xml.Linq;
 using MineFlags.GenericTypes;
 using MineFlags.Logic;
+using System.ComponentModel;
 
 namespace MineFlags.PlayerType
 {
@@ -42,21 +42,37 @@ namespace MineFlags.PlayerType
             if (playerNumber != PlayerNum)
                 return;
 
-            // This AI is really dumb and just randomly selects a mine and hopes for the best
-            Random r = new Random();
-            for (;;)
+            BackgroundWorker bw = new BackgroundWorker();
+
+            bw.DoWork += new DoWorkEventHandler(
+            delegate (object o, DoWorkEventArgs args)
             {
-                int index = r.Next(0, OpenedMinefield.Length - 1);
+                // Simulate thinking...
+                Random rand = new Random(19);
+                System.Threading.Thread.Sleep(rand.Next(100, 700));
 
-                // We can't open that one, try again
-                if (OpenedMinefield[index])
-                    continue;
+                // This AI is really dumb and just randomly selects a mine and hopes for the best
+                for (;;)
+                {
+                    int index = rand.Next(0, OpenedMinefield.Length - 1);
 
-                // Signal the controller to open the mine
-                BaseController.OnOpenMine(index, PlayerNum, false);
+                    // We can't open that one, try again
+                    if (OpenedMinefield[index])
+                        continue;
 
-                break;
-            }
+                    // Signal the controller to open the mine (on the mainthread)
+                    var mainThreadDelegate = new Action<object>(delegate (object param)
+                    {
+                        BaseController.OnOpenMine(index, PlayerNum, false);
+                    });
+                    mainThreadDelegate.Invoke("test");
+
+                    break;
+                }
+            });
+
+            // Kick off the background worker to speed up the load of the view
+            bw.RunWorkerAsync();
         }
 
         public override string GetPlayerType()

@@ -11,18 +11,24 @@ namespace MineFlags
 {
     public partial class MineField : Form
     {
+        // Some constants and statics
         public const int PADDING = 10;
         public const int HEADERHEIGHT = 80;
         public const int BUTTONSIZE = 32;
-        public static int ROWS = 16;
-        public static int COLUMNS = 16;
-        public static int MINES = 50;
-        private MineFlagController Controller;
+        public static int ROWS = 18;
+        public static int COLUMNS = 18;
+        public static int MINES = 60;
+
+        // The Controller
+        private IController Controller;
+
+        // View components
         private MineButton[] MineButtons;
         private Panel GameContainer;
         private Label Player1Points;
         private Label Player2Points;
         private Label PlayerTurn;
+
         private PlayerNum CurrentPlayerNumber;
 
         public MineField()
@@ -35,9 +41,10 @@ namespace MineFlags
             base.OnLoad(e);
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void GameView_load(object sender, EventArgs e)
         {
             // Add event handlers
+            BaseController.ResetMinefieldEvent += ResetMinefield;
             BaseController.MineOpenedEvent += HandleMineAction;
             BaseController.AnnounceTurnEvent += HandleTurn;
             BaseController.ScoreChangedEvent += HandleScoreChanged;
@@ -50,10 +57,19 @@ namespace MineFlags
             // Instantiate minebuttons array
             MineButtons = new MineButton[ROWS * COLUMNS];
 
-            StartGame();
+            // No AI and do not reset the state per default
+            StartGame(false, false);
         }
 
-        private void StartGame()
+        private void ResetMinefield(bool ai)
+        {
+            // Do this on the GUI thread
+            Invoke(new Action(() => {
+                NewGame(ai, false);
+            }));
+        }
+
+        private void StartGame(bool ai, bool resetState)
         {
             SetupContainer(ClientSize);
             SetupHeader(ClientSize);
@@ -64,11 +80,15 @@ namespace MineFlags
             {
                 Controller = new MineFlagController(); // Instantiate our MineFlagController (the main game logic)
                 // Instantiate a new game WITHOUT AI from the start
-                Controller.NewGame(false, ROWS, COLUMNS, MINES, false);
+                Controller.NewGame(resetState, ROWS, COLUMNS, MINES, false);
+            }
+            else
+            {
+                Controller.NewGame(resetState, ROWS, COLUMNS, MINES, ai);
             }
         }
 
-        private void NewGame(bool ai)
+        private void NewGame(bool ai, bool resetState)
         {
             if (GameContainer != null)
             {
@@ -76,11 +96,7 @@ namespace MineFlags
                 GameContainer.Dispose();
             }
 
-            // New game!
-            if (Controller != null)
-                Controller.NewGame(true, ROWS, COLUMNS, MINES, ai);
-
-            StartGame();
+            StartGame(ai, resetState);
         }
 
         private void CreateMenu()
@@ -105,12 +121,12 @@ namespace MineFlags
         // Event that is called from menu item.
         private void NewGameClick(object sender, EventArgs e)
         {
-            NewGame(false);
+            NewGame(false, true);
         }
 
         private void NewGameAIClick(object sender, EventArgs e)
         {
-            NewGame(true);
+            NewGame(true, true);
         }
 
         private void ExitGameClick(object sender, EventArgs e)
@@ -195,6 +211,11 @@ namespace MineFlags
             BaseController.OnOpenMine(clickedIndex, CurrentPlayerNumber, true);
         }
 
+        private void OnNewGame(int rows, int columns, int numberOfPlayers)
+        {
+            // We have a signal of a new game
+        }
+
         private void HandleMineAction(PlayerNum playerNumber, Mine mine, bool success)
         {
             // Catch onMineOpened event
@@ -203,11 +224,28 @@ namespace MineFlags
             MineButton modifiedMine = MineButtons[mine.index];
             if (mine.IsOpened())
             {
-                modifiedMine.adjacentNeighbours = mine.GetNeighbours();
-
-                if (mine.IsMine())
+                // Handle the multi threading during load
+                if (modifiedMine.InvokeRequired)
                 {
-                    modifiedMine.PlayerNumber = mine.OpenedBy;
+                    modifiedMine.Invoke((MethodInvoker)(() =>
+                    {
+                        modifiedMine.adjacentNeighbours = mine.GetNeighbours();
+
+                        if (mine.IsMine())
+                        {
+                            modifiedMine.PlayerNumber = mine.OpenedBy;
+                        }
+                    }));
+                }
+                // If the GUI thread updates... just update
+                else
+                {
+                    modifiedMine.adjacentNeighbours = mine.GetNeighbours();
+
+                    if (mine.IsMine())
+                    {
+                        modifiedMine.PlayerNumber = mine.OpenedBy;
+                    }
                 }
             }
         }
@@ -217,10 +255,22 @@ namespace MineFlags
             CurrentPlayerNumber = playerNumber;
 
             if (PlayerTurn != null)
-                PlayerTurn.Text = "Player " + ((playerNumber == PlayerNum.ONE) ? "one's" : "two's") + " turn";
+            {
+                if (PlayerTurn.InvokeRequired)
+                {
+                    PlayerTurn.Invoke((MethodInvoker)(() =>
+                    {
+                        PlayerTurn.Text = "Player " + ((playerNumber == PlayerNum.ONE) ? "one's" : "two's") + " turn";
+                    }));
+                }
+                else
+                {
+                    PlayerTurn.Text = "Player " + ((playerNumber == PlayerNum.ONE) ? "one's" : "two's") + " turn";
+                }
+            }
         }
 
-        private void HandleScoreChanged(ref IPlayer player, int score)
+        private void HandleScoreChanged(IPlayer player, int score)
         {
             Console.WriteLine("Player {0} has a score of {1}", player.ToString(), score.ToString());
             switch (player.GetPlayerNumber())
@@ -228,15 +278,37 @@ namespace MineFlags
                 case PlayerNum.ONE:
                     if (Player1Points != null)
                     {
-                        Player1Points.Text = "Player 1 points: " + score.ToString();
-                        Player1Points.Size = new Size(Player1Points.PreferredWidth, Player1Points.PreferredHeight);
+                        if (Player1Points.InvokeRequired)
+                        {
+                            Player1Points.Invoke((MethodInvoker)(() =>
+                            {
+                                Player1Points.Text = "Player 1 points: " + score.ToString();
+                                Player1Points.Size = new Size(Player1Points.PreferredWidth, Player1Points.PreferredHeight);
+                            }));
+                        }
+                        else
+                        {
+                            Player1Points.Text = "Player 1 points: " + score.ToString();
+                            Player1Points.Size = new Size(Player1Points.PreferredWidth, Player1Points.PreferredHeight);
+                        }
                     }
                     break;
                 case PlayerNum.TWO:
                     if (Player2Points != null)
                     {
-                        Player2Points.Text = "Player 2 points: " + score.ToString();
-                        Player2Points.Size = new Size(Player2Points.PreferredWidth, Player2Points.PreferredHeight);
+                        if (Player2Points.InvokeRequired)
+                        {
+                            Player2Points.Invoke((MethodInvoker)(() =>
+                            {
+                                Player2Points.Text = "Player 2 points: " + score.ToString();
+                                Player2Points.Size = new Size(Player2Points.PreferredWidth, Player2Points.PreferredHeight);
+                            }));
+                        }
+                        else
+                        {
+                            Player2Points.Text = "Player 2 points: " + score.ToString();
+                            Player2Points.Size = new Size(Player2Points.PreferredWidth, Player2Points.PreferredHeight);
+                        }
                     }
                     break;
                 default:
@@ -244,9 +316,11 @@ namespace MineFlags
             }
         }
 
-        private void HandleGameCompleted(ref IPlayer player)
+        private void HandleGameCompleted(IPlayer player)
         {
-            MessageBox.Show(this, "Player " + player.GetPlayerNumber().ToString() + " won!");
+            Invoke(new Action(() => {
+                MessageBox.Show(this, "Player " + player.GetPlayerNumber().ToString() + " won!");
+            }));
         }
     }
 }

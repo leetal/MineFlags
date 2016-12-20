@@ -7,17 +7,22 @@ namespace MineFlags.RulesEngine
     class GameRules : IRules
     {
         private IController Controller;
+
+        /// <summary>
+        /// Instantiates a new GameRules engine that evaluates each move
+        /// </summary>
+        /// <param name="controller"></param>
         public GameRules(IController controller)
         {
             Controller = controller;
         }
 
-        /*
-         * This will evaluate the current mine open
-         *  
-         * Returns true upon successful open (that gave the player a point). False otherwise
-         * 
-         */
+        /// <summary>
+        /// This will evaluate the current mine open
+        /// </summary>
+        /// <param name="mine"></param>
+        /// <param name="player"></param>
+        /// <returns>true upon successful open (that gave the player a point). False otherwise</returns>
         public bool Evaluate(ref Mine mine, ref IPlayer player)
         {
             // Open the mine

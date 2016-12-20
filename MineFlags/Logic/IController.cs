@@ -6,9 +6,7 @@ namespace MineFlags.Logic
     {
         void NewGame(bool reset, int rows, int columns, int mines, bool addAiPlayer);
         void Dispose();
-        void FetchStoredState();
-        void ResumeGameFromState();
-        //bool OpenMine(int index);
+        void GameFromState();
         void OpenNeighbouringMines(int index, IPlayer p);
         void ChangeTurn();
     }
