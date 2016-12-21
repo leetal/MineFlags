@@ -55,7 +55,7 @@ namespace MineFlags
 
                 Thread.Sleep(1000);
 
-                Application.Exit();
+                ExitGameClick(null, null);
             }
 
             InitializeComponent();
@@ -114,7 +114,6 @@ namespace MineFlags
             // Must exists POST-init of controls
             if (Controller == null)
             {
-                
                 // Instantiate a new game WITHOUT AI from the start
                 Controller.NewGame(resetState, ROWS, COLUMNS, MINES, false);
             }
