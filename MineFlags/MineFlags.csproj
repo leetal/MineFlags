@@ -67,8 +67,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Logic\BaseController.cs" />
+    <Compile Include="Exceptions\InvalidDIException.cs" />
+    <Compile Include="Exceptions\StateException.cs" />
+    <Compile Include="Exceptions\UnknownNeighboursException.cs" />
     <Compile Include="Logic\IController.cs" />
+    <Compile Include="Notification\StorageCenter.cs" />
+    <Compile Include="Notification\GameCenter.cs" />
     <Compile Include="PlayerType\AbstractPlayer.cs" />
     <Compile Include="PlayerType\AIPlayer.cs" />
     <Compile Include="PlayerType\IPlayer.cs" />
@@ -77,6 +81,7 @@
     <Compile Include="RulesEngine\GameRules.cs" />
     <Compile Include="RulesEngine\IRules.cs" />
     <Compile Include="GenericTypes\AbstractState.cs" />
+    <Compile Include="Storage\IStateHandler.cs" />
     <Compile Include="Storage\IStorageEntity.cs" />
     <Compile Include="Storage\IWatcher.cs" />
     <Compile Include="ViewModels\MineButton.cs">

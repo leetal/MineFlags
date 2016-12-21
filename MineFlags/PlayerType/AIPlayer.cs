@@ -3,12 +3,15 @@ using System.Linq;
 using MineFlags.GenericTypes;
 using MineFlags.Logic;
 using System.ComponentModel;
+using MineFlags.Notification;
 
 namespace MineFlags.PlayerType
 {
     public class AIPlayer : AbstractPlayer
     {
         private bool[] OpenedMinefield { get; set; }
+        private int Columns;
+        private int Rows;
 
         public AIPlayer() : base() { }
 
@@ -18,8 +21,12 @@ namespace MineFlags.PlayerType
 
         protected override void OnNewGame(int rows, int columns, int numberOfPlayers)
         {
-            // The AI must somehow remeber what tile has been opened or not..
-            OpenedMinefield = Enumerable.Repeat(false, rows * columns).ToArray();
+            Rows = rows;
+            Columns = columns;
+
+            // The AI must somehow remeber what tile has been opened or not...
+            // All will default to false
+            OpenedMinefield = new bool[Rows * Columns];
         }
 
         protected override void OnMineOpened(PlayerNum playerNumber, Mine m, bool success) {
@@ -63,7 +70,7 @@ namespace MineFlags.PlayerType
                     // Signal the controller to open the mine (on the mainthread)
                     var mainThreadDelegate = new Action<object>(delegate (object param)
                     {
-                        BaseController.OnOpenMine(index, PlayerNum, false);
+                        GameCenter.Instance.OnOpenMine(index, PlayerNum, false);
                     });
                     mainThreadDelegate.Invoke("test");
 

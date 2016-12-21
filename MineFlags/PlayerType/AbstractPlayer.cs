@@ -1,6 +1,6 @@
 ﻿using System.Xml.Linq;
 using MineFlags.GenericTypes;
-using MineFlags.Logic;
+using MineFlags.Notification;
 
 namespace MineFlags.PlayerType
 {
@@ -32,10 +32,10 @@ namespace MineFlags.PlayerType
         public AbstractPlayer()
         {
             // Subscribe to the events
-            BaseController.NewGameEvent += OnNewGame;
-            BaseController.ScoreChangedEvent += OnScoreChanged;
-            BaseController.MineOpenedEvent += OnMineOpened;
-            BaseController.AnnounceTurnEvent += HandleTurn;
+            GameCenter.Instance.NewGameEvent += OnNewGame;
+            GameCenter.Instance.ScoreChangedEvent += OnScoreChanged;
+            GameCenter.Instance.MineOpenedEvent += OnMineOpened;
+            GameCenter.Instance.AnnounceTurnEvent += HandleTurn;
         }
 
         public AbstractPlayer(int score, PlayerNum playerNum) : this()
@@ -47,10 +47,10 @@ namespace MineFlags.PlayerType
         public void Dispose()
         {
             // Unsubscribe from the events
-            BaseController.NewGameEvent -= OnNewGame;
-            BaseController.ScoreChangedEvent -= OnScoreChanged;
-            BaseController.MineOpenedEvent -= OnMineOpened;
-            BaseController.AnnounceTurnEvent -= HandleTurn;
+            GameCenter.Instance.NewGameEvent -= OnNewGame;
+            GameCenter.Instance.ScoreChangedEvent -= OnScoreChanged;
+            GameCenter.Instance.MineOpenedEvent -= OnMineOpened;
+            GameCenter.Instance.AnnounceTurnEvent -= HandleTurn;
         }
 
         public PlayerNum GetPlayerNumber()

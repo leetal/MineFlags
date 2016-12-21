@@ -1,4 +1,7 @@
-﻿using System;
+﻿using MineFlags.Logic;
+using MineFlags.RulesEngine;
+using MineFlags.Storage;
+using System;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -18,6 +21,7 @@ namespace MineFlags
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
             Application.Run(new MineField());
         }
     }

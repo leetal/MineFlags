@@ -65,10 +65,10 @@ namespace MineFlags.GenericTypes
                 switch (Type)
                 {
                     case "regular":
-                        TempIPlayer = (IPlayer)new RegularPlayer();
+                        TempIPlayer = new RegularPlayer();
                         break;
                     case "ai":
-                        TempIPlayer = (IPlayer)new AIPlayer();
+                        TempIPlayer = new AIPlayer();
                         break;
                 }
 
@@ -121,7 +121,9 @@ namespace MineFlags.GenericTypes
                 new XElement("state",
                     new XElement("mines", GetAllMines()),
                     new XElement("players", GetAllPlayers()),
+                    new XComment("rows CANNOT BE MODIFIED AT THIS TIME"),
                     new XElement("rows", Rows),
+                    new XComment("columns CANNOT BE MODIFIED AT THIS TIME"),
                     new XElement("columns", Columns),
                     new XElement("nomines", Mines),
                     new XElement("remainingmines", RemainingMines),

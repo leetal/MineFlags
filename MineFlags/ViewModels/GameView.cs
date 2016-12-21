@@ -4,6 +4,11 @@ using System.Windows.Forms;
 using MineFlags.PlayerType;
 using MineFlags.GenericTypes;
 using MineFlags.Logic;
+using MineFlags.Notification;
+using MineFlags.Storage;
+using MineFlags.RulesEngine;
+using MineFlags.Exceptions;
+using System.Threading;
 
 // LINQ: https://msdn.microsoft.com/en-us/library/bb308959.aspx
 
@@ -15,9 +20,10 @@ namespace MineFlags
         public const int PADDING = 10;
         public const int HEADERHEIGHT = 80;
         public const int BUTTONSIZE = 32;
-        public static int ROWS = 18;
-        public static int COLUMNS = 18;
-        public static int MINES = 60;
+        public const int ROWS = 18;
+        public const int COLUMNS = 18;
+        public const int MINES = 61;
+        private const string FilePath = "data.xml";
 
         // The Controller
         private IController Controller;
@@ -33,7 +39,31 @@ namespace MineFlags
 
         public MineField()
         {
+            // Instantiate all classes we need using Dependency Injection to pass them downwards
+            try
+            {
+                IRules RulesEngine = new GameRules();
+                IWatcher FileWatcher = new Watcher(FilePath);
+                IStateHandler StateHandler = new StateHandler(FilePath, FileWatcher);
+
+                Controller = new MineFlagController(RulesEngine, StateHandler);
+            }
+            catch (InvalidDIException e)
+            {
+                // Since this is a critical error, just exit the application
+                PrintNotification("Application failed to start due to code error. Reason: " + e.Message);
+
+                Thread.Sleep(1000);
+
+                Application.Exit();
+            }
+
             InitializeComponent();
+        }
+
+        ~MineField()
+        {
+            Controller.Dispose();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -41,25 +71,31 @@ namespace MineFlags
             base.OnLoad(e);
         }
 
+        /// <summary>
+        /// This is our main view loader. At this state, all is setup and ready to go
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void GameView_load(object sender, EventArgs e)
         {
             // Add event handlers
-            BaseController.ResetMinefieldEvent += ResetMinefield;
-            BaseController.MineOpenedEvent += HandleMineAction;
-            BaseController.AnnounceTurnEvent += HandleTurn;
-            BaseController.ScoreChangedEvent += HandleScoreChanged;
-            BaseController.GameCompletedEvent += HandleGameCompleted;
+            GameCenter.Instance.NotificationEvent += PrintNotification;
+            GameCenter.Instance.ResetMinefieldEvent += ResetMinefield;
+            GameCenter.Instance.MineOpenedEvent += HandleMineAction;
+            GameCenter.Instance.AnnounceTurnEvent += HandleTurn;
+            GameCenter.Instance.ScoreChangedEvent += HandleScoreChanged;
+            GameCenter.Instance.GameCompletedEvent += HandleGameCompleted;
 
             // Static size on the game
             ClientSize = new Size((COLUMNS * BUTTONSIZE + PADDING * 2), (ROWS * BUTTONSIZE + PADDING * 2) + HEADERHEIGHT);
             CreateMenu();
             
-            // Instantiate minebuttons array
+            // Instantiate all classes
             MineButtons = new MineButton[ROWS * COLUMNS];
-
+            
             // No AI and do not reset the state per default
             StartGame(false, false);
-        }
+        } 
 
         private void ResetMinefield(bool ai)
         {
@@ -78,7 +114,7 @@ namespace MineFlags
             // Must exists POST-init of controls
             if (Controller == null)
             {
-                Controller = new MineFlagController(); // Instantiate our MineFlagController (the main game logic)
+                
                 // Instantiate a new game WITHOUT AI from the start
                 Controller.NewGame(resetState, ROWS, COLUMNS, MINES, false);
             }
@@ -202,13 +238,20 @@ namespace MineFlags
             GameContainer.Controls.AddRange(MineButtons);
         }
 
+        private void PrintNotification(string message)
+        {
+            Invoke(new Action(() => {
+                MessageBox.Show(this, message);
+            }));
+        }
+
         private void mineButtonClickEvent(object sender, EventArgs e)
         {
             MineButton caller = (MineButton)sender;
             int clickedIndex = (int)caller.Tag;
 
             // Signal to the controller to open a mine
-            BaseController.OnOpenMine(clickedIndex, CurrentPlayerNumber, true);
+            GameCenter.Instance.OnOpenMine(clickedIndex, CurrentPlayerNumber, true);
         }
 
         private void OnNewGame(int rows, int columns, int numberOfPlayers)

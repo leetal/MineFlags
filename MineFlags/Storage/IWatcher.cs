@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MineFlags.Storage
 {
-    interface IWatcher
+    public interface IWatcher
     {
         void Run();
         void Dispose();

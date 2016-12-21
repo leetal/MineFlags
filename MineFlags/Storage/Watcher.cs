@@ -1,25 +1,21 @@
-﻿using System;
+﻿using MineFlags.Notification;
 using System.IO;
 using System.Security.Permissions;
-using MineFlags.Logic;
 
 namespace MineFlags.Storage
 {
     public class Watcher : IWatcher
     {
     	private FileSystemWatcher FileWatcher { get; set; }
-        private string Filename;
-        private IController Controller;
+        private string FilePath;
 
-        public Watcher(string path, IController controller) 
+        public Watcher(string filenamePath) 
         {
-            Controller = controller;
-            Filename = path;
+            FilePath = filenamePath;
         }
 
         public void Dispose()
         {
-            Controller = null;
             FileWatcher.Changed -= handleChange;
             FileWatcher = null;
         }
@@ -37,7 +33,7 @@ namespace MineFlags.Storage
             // Set some filters for changes
             FileWatcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
                                  | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-            FileWatcher.Filter = Filename;
+            FileWatcher.Filter = FilePath;
 
             // Attach callbacks
             FileWatcher.Changed += handleChange;
@@ -48,13 +44,12 @@ namespace MineFlags.Storage
 
         private void handleChange(object source, FileSystemEventArgs args)
         {
-            Console.WriteLine("File: " + args.FullPath + " " + args.ChangeType);
-            FileWatcher.EnableRaisingEvents = false;
+            if (FileWatcher != null)
+                FileWatcher.EnableRaisingEvents = false;
 
-            if(Controller != null)
-                Controller.GameFromState();
+            // Notify any listeners of the file change event
+            StorageCenter.Instance.OnFileChangeEvent();
 
-            // This case can occur if a race condition causes the filewatcher do dealloc before the game has reset for example
             if (FileWatcher != null)
                 FileWatcher.EnableRaisingEvents = true;
         }

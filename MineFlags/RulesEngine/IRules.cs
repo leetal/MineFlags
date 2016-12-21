@@ -6,8 +6,8 @@ namespace MineFlags.RulesEngine
     /// <summary>
     /// IRules interface determines the available methods of the rules engine
     /// </summary>
-    interface IRules
+    public interface IRules
     {
-        bool Evaluate(ref Mine mine, ref IPlayer player);
+        bool Evaluate(ref Mine mine);
     }
 }
