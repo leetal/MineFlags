@@ -9,6 +9,9 @@ namespace MineFlags
 {
     static class Program
     {
+        // Constants used int he application
+        private const string FilePath = "data.xml";
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -22,7 +25,7 @@ namespace MineFlags
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Application.Run(new MineField());
+            Application.Run(new MineField(FilePath));
         }
     }
 }

@@ -23,7 +23,6 @@ namespace MineFlags
         public const int ROWS = 18;
         public const int COLUMNS = 18;
         public const int MINES = 61;
-        private const string FilePath = "data.xml";
 
         // The Controller
         private IController Controller;
@@ -37,14 +36,14 @@ namespace MineFlags
 
         private PlayerNum CurrentPlayerNumber;
 
-        public MineField()
+        public MineField(string filePath)
         {
             // Instantiate all classes we need using Dependency Injection to pass them downwards
             try
             {
                 IRules RulesEngine = new GameRules();
-                IWatcher FileWatcher = new Watcher(FilePath);
-                IStateHandler StateHandler = new StateHandler(FilePath, FileWatcher);
+                IWatcher FileWatcher = new Watcher(filePath);
+                IStateHandler StateHandler = new StateHandler(filePath, FileWatcher);
 
                 Controller = new MineFlagController(RulesEngine, StateHandler);
             }

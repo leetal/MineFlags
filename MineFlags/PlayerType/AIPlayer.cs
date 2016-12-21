@@ -55,8 +55,9 @@ namespace MineFlags.PlayerType
             delegate (object o, DoWorkEventArgs args)
             {
                 // Simulate thinking...
-                Random rand = new Random(19);
-                System.Threading.Thread.Sleep(rand.Next(100, 700));
+                Random rand = new Random();
+
+                System.Threading.Thread.Sleep(rand.Next(100, 1200));
 
                 // This AI is really dumb and just randomly selects a mine and hopes for the best
                 for (;;)
