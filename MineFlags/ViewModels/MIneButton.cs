@@ -15,7 +15,6 @@ namespace MineFlags
                 BackColor = System.Drawing.Color.FromArgb(255, 210, 210, 210); // Taken (Gray)
                 if(AdjacentNeighbours > 0)
                     Text = adjacentNeighbours.ToString();
-
             }
         }
         
@@ -27,9 +26,13 @@ namespace MineFlags
                 IntPlayerNumber = value;
                 // Not optimal, but we only support two players ATM
                 if (IntPlayerNumber == PlayerNum.ONE) {
-                    BackColor = System.Drawing.Color.FromArgb(255, 231, 76, 60); // One (ALZARIN)
+                    BackColor = System.Drawing.Color.FromArgb(255, 231, 76, 60); // One
+                    ForeColor = System.Drawing.Color.White;
+                    Text = "P1";
                 } else {
-                    BackColor = System.Drawing.Color.FromArgb(255, 52, 73, 94); // Two (wet asphalt)
+                    BackColor = System.Drawing.Color.FromArgb(255, 52, 73, 94); // Two
+                    ForeColor = System.Drawing.Color.White;
+                    Text = "P2";
                 }
             }
         }

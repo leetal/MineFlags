@@ -220,13 +220,13 @@ namespace MineFlags
             {
                 for (int col = 0; col < COLUMNS; col++)
                 {
-                    MineFlags.MineButton tempButton = new MineButton();
+                    MineButton tempButton = new MineButton();
                     tempButton.Location = new Point((col * BUTTONSIZE), (row * BUTTONSIZE) + HEADERHEIGHT);
                     tempButton.Name = "MineButton" + currentButtonIndex.ToString();
                     tempButton.Size = new Size(BUTTONSIZE, BUTTONSIZE);
                     tempButton.TabIndex = 0;
                     tempButton.Tag = currentButtonIndex;
-                    tempButton.Click += new EventHandler(mineButtonClickEvent);
+                    tempButton.Click += MineButtonClickEvent;
                     MineButtons[currentButtonIndex] = tempButton;
                     currentButtonIndex++;
                 }
@@ -243,7 +243,7 @@ namespace MineFlags
             }));
         }
 
-        private void mineButtonClickEvent(object sender, EventArgs e)
+        private void MineButtonClickEvent(object sender, EventArgs e)
         {
             MineButton caller = (MineButton)sender;
             int clickedIndex = (int)caller.Tag;
